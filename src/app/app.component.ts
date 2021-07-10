@@ -45,5 +45,6 @@ export class AppComponent implements AfterViewInit {
       el.style.borderColor = 'black'
     })
     this.clicked_cells = []
+    this.setting_word = false
   }
 }

@@ -2,7 +2,7 @@
 <table>
   <tr>
     <th *ngFor="let letter of alpha_arr" [innerText]=letter class=cell></th>
-    <th class=cell id=close *ngIf=setting_word (click)="clearClicked()"><mat-icon aria-hidden="false" aria-label="Example home icon">close</mat-icon></th>
+    <th class=cell id=close *ngIf=setting_word (click)="clearClicked()"><mat-icon aria-hidden="false" aria-label="Очистить нажатые плитки">close</mat-icon></th>
   </tr>
 </table>
 <div class="board b-table">
