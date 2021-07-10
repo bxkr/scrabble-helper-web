@@ -10,13 +10,15 @@ import { read_json } from "../scripts/json";
 export class AppComponent implements AfterViewInit {
   title = 'scrabble-helper'
   row_range = numberRange(1, 16)
+  clicked_cells: any[] = []
+  setting_word = false
+  alpha_arr = Array.from(String.fromCharCode(...[...Array('О'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))))
   col_range(rn: number, cn: number): string {
-    const al = Array.from(String.fromCharCode(...[...Array('О'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))))
     const nl = numberRange(1, 16)
-    return al[cn-1] + nl[rn-1].toString()
+    return this.alpha_arr[cn-1] + nl[rn-1].toString()
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     const center_tile = document.getElementById('З8')!
     fetch('../assets/double-star.svg')
       .then(response => response.text())
@@ -30,5 +32,18 @@ export class AppComponent implements AfterViewInit {
         })
       })
     })
+  }
+
+  public onCellTouch(cell: any): void {
+    this.setting_word = true
+    this.clicked_cells.push(cell.target)
+    cell.target.style.borderColor = 'red'
+  }
+
+  public clearClicked(): void {
+    this.clicked_cells.forEach( (el) => {
+      el.style.borderColor = 'black'
+    })
+    this.clicked_cells = []
   }
 }

@@ -1,6 +1,12 @@
 <h2>{{title}}</h2>
-<table id=board>
-  <tr *ngFor="let rn of row_range" [id]=rn>
-    <td *ngFor="let cn of row_range" [id]="col_range(rn, cn)" [innerText]="col_range(rn, cn)" class=cell></td>
+<table>
+  <tr>
+    <th *ngFor="let letter of alpha_arr" [innerText]=letter class=cell></th>
+    <th class=cell id=close *ngIf=setting_word (click)="clearClicked()"><mat-icon aria-hidden="false" aria-label="Example home icon">close</mat-icon></th>
   </tr>
 </table>
+<div class="board b-table">
+  <div *ngFor="let rn of row_range" [id]=rn>
+    <div *ngFor="let cn of row_range" [id]="col_range(rn, cn)" [innerText]="" class="cell board" (click)="onCellTouch($event)"></div>
+  </div>
+</div>
