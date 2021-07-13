@@ -29,3 +29,7 @@
   -ms-transform: rotate(90deg) scaleY(-1);
   -o-transform: rotate(90deg) scaleY(-1);
 }
+
+#З8 {
+  background-image: url('../assets/double-star.svg');
+}

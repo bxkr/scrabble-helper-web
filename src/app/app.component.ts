@@ -21,12 +21,6 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const center_tile = document.getElementById('З8')!
-    fetch('../assets/double-star.svg')
-      .then(response => response.text())
-      .then(data => {
-        center_tile.innerHTML = data
-      });
     read_json('../assets/tile-colors.json').then( (colors) => {
       Object.entries(colors).forEach((ca: any[]) => {
         ca[1].forEach((cell: string) => {
@@ -39,8 +33,13 @@ export class AppComponent implements AfterViewInit {
   public onCellTouch(cell: any): void {
     this.setting_word = true
     if (this.direction == undefined || cell.target.id[0] == this.dir_ref || cell.target.id[1] == this.dir_ref) {
-      this.clicked_cells.push(cell.target)
-      cell.target.style.borderColor = 'red'
+      if (this.clicked_cells.length == 0 || cell.target.id[0] == this.clicked_cells[0].id[0] || cell.target.id[1] == this.clicked_cells[0].id[1]) {
+        this.clicked_cells.push(cell.target)
+        cell.target.style.borderColor = 'red'
+        if (cell.target.style.backgroundColor == 'rgb(255, 0, 0)') {
+          cell.target.style.backgroundImage = 'url("../assets/dot.svg")'
+        }
+      }
     }
     if (this.direction == undefined && this.clicked_cells.length == 2) {
       if (this.clicked_cells[0].id[0] == this.clicked_cells[1].id[0]) {
@@ -56,6 +55,9 @@ export class AppComponent implements AfterViewInit {
   public clearClicked(): void {
     this.clicked_cells.forEach( (el) => {
       el.style.borderColor = 'black'
+      if (el.style.backgroundImage == 'url("../assets/dot.svg")') {
+        el.style.backgroundImage = ''
+      }
     })
     this.clicked_cells = []
     this.setting_word = false
