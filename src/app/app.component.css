@@ -1,35 +1,42 @@
-.cell {
-  width: 50px;
-  height: 50px;
-  text-align: center;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-#close {
-  cursor: pointer;
+#clear {
+  margin: 1vh
 }
 
 .board {
   background-color: darkgreen;
-  border: 2px solid black;
-  border-collapse: collapse;
+  width: 5vh;
+  height: 5vh;
+  user-select: none;
+  outline: 2px solid black;
 }
 
 .b-table {
-  position: absolute;
+  width: fit-content;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  transform: rotate(90deg) scaleY(-1);
-  -webkit-transform: rotate(90deg) scaleY(-1);
-  -moz-transform: rotate(90deg) scaleY(-1);
-  -ms-transform: rotate(90deg) scaleY(-1);
-  -o-transform: rotate(90deg) scaleY(-1);
+  grid-template-columns: repeat(15, 5vh);
+  grid-gap: 4px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 4px solid black;
 }
 
 #З8 {
   background-image: url('../assets/double-star.svg');
+}
+
+#general {
+  width: 100%;
+  height: auto;
+  text-align: center;
+}
+
+#alpha {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#alpha > tr > th {
+  width: 5vh;
+  height: 5vh;
+  user-select: none;
 }

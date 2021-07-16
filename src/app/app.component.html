@@ -1,12 +1,14 @@
-<h2>{{title}}</h2>
-<table>
-  <tr>
-    <th *ngFor="let letter of alpha_arr" [innerText]=letter class=cell></th>
-    <th class=cell id=close *ngIf=setting_word (click)="clearClicked()"><mat-icon aria-hidden="false" aria-label="Очистить нажатые плитки">close</mat-icon></th>
-  </tr>
-</table>
-<div class="board b-table">
-  <div *ngFor="let rn of row_range" [id]=rn>
-    <div *ngFor="let cn of row_range" [id]="col_range(rn, cn)" [innerText]="" class="cell board" (click)="onCellTouch($event)"></div>
+<div id=general>
+  <h2>{{title}}</h2>
+  <table id=alpha>
+    <tr>
+      <th *ngFor="let letter of alpha_arr" [innerText]=letter></th>
+    </tr>
+  </table>
+  <div class=b-table>
+    <div *ngFor="let id of cell_range()" [id]="id" (click)="onCellTouch($event)" class=board></div>
+  </div>
+  <div id=clear *ngIf=setting_word (click)="clearClicked()">
+    <button mat-stroked-button>Очистить нажатые плитки</button>
   </div>
 </div>

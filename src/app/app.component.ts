@@ -14,10 +14,15 @@ export class AppComponent implements AfterViewInit {
   setting_word = false
   direction: string | undefined;
   dir_ref: string | undefined;
-  alpha_arr = Array.from(String.fromCharCode(...[...Array('О'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))))
-  col_range(rn: number, cn: number): string {
-    const nl = numberRange(1, 16)
-    return this.alpha_arr[cn-1] + nl[rn-1].toString()
+  alpha_arr = Array.from(String.fromCharCode(...[...Array('О'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))));
+  cell_range(): string[] {
+    let result: string[] = [];
+    this.row_range.forEach((nb) => {
+    this.alpha_arr.forEach((lt) => {
+        result.push(lt + nb.toString())
+      })
+    })
+    return result
   }
 
   ngAfterViewInit(): void {
@@ -35,7 +40,7 @@ export class AppComponent implements AfterViewInit {
     if (this.direction == undefined || cell.target.id[0] == this.dir_ref || cell.target.id[1] == this.dir_ref) {
       if (this.clicked_cells.length == 0 || cell.target.id[0] == this.clicked_cells[0].id[0] || cell.target.id[1] == this.clicked_cells[0].id[1]) {
         this.clicked_cells.push(cell.target)
-        cell.target.style.borderColor = 'red'
+        cell.target.style.outlineColor = 'red'
         if (cell.target.style.backgroundColor == 'rgb(255, 0, 0)') {
           cell.target.style.backgroundImage = 'url("../assets/dot.svg")'
         }
@@ -54,7 +59,7 @@ export class AppComponent implements AfterViewInit {
 
   public clearClicked(): void {
     this.clicked_cells.forEach( (el) => {
-      el.style.borderColor = 'black'
+      el.style.outlineColor = 'black'
       if (el.style.backgroundImage == 'url("../assets/dot.svg")') {
         el.style.backgroundImage = ''
       }
