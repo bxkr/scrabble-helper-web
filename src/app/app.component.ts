@@ -37,12 +37,16 @@ export class AppComponent implements AfterViewInit {
 
   public onCellTouch(cell: any): void {
     this.setting_word = true
-    if (this.direction == undefined || cell.target.id[0] == this.dir_ref || cell.target.id[1] == this.dir_ref) {
-      if (this.clicked_cells.length == 0 || cell.target.id[0] == this.clicked_cells[0].id[0] || cell.target.id[1] == this.clicked_cells[0].id[1]) {
-        this.clicked_cells.push(cell.target)
-        cell.target.style.outlineColor = 'red'
-        if (cell.target.style.backgroundColor == 'rgb(255, 0, 0)') {
-          cell.target.style.backgroundImage = 'url("../assets/dot.svg")'
+    if (cell.target.id.length == 2) {
+      if (this.direction == undefined || cell.target.id[0] == this.dir_ref || cell.target.id[1] == this.dir_ref) {
+        if (this.clicked_cells.length == 0 || cell.target.id[0] == this.clicked_cells[0].id[0] || cell.target.id[1] == this.clicked_cells[0].id[1]) {
+          this.cellOk(cell)
+        }
+      }
+    } else if (cell.target.id.length == 3) {
+      if (this.direction == undefined || cell.target.id[0] == this.dir_ref || cell.target.id[1] + cell.target.id[2] == this.dir_ref) {
+        if (this.clicked_cells.length == 0 || cell.target.id[0] == this.clicked_cells[0].id[0] || cell.target.id[1] + cell.target.id[2] == this.clicked_cells[0].id[1] + this.clicked_cells[0].id[2]) {
+          this.cellOk(cell)
         }
       }
     }
@@ -52,8 +56,20 @@ export class AppComponent implements AfterViewInit {
         this.dir_ref = this.clicked_cells[0].id[0]
       } else if (this.clicked_cells[0].id[1] == this.clicked_cells[1].id[1]) {
         this.direction = 'h'
-        this.dir_ref = this.clicked_cells[0].id[1]
+        if (this.clicked_cells[0].id.length == 2) {
+          this.dir_ref = this.clicked_cells[0].id[1]
+        } else if (this.clicked_cells[0].id.length == 3) {
+          this.dir_ref = this.clicked_cells[0].id[1] + this.clicked_cells[0].id[2]
+        }
       }
+    }
+  }
+
+  public cellOk(cell: any): void {
+    this.clicked_cells.push(cell.target)
+    cell.target.style.outlineColor = 'red'
+    if (cell.target.style.backgroundColor == 'rgb(255, 0, 0)') {
+      cell.target.style.backgroundImage = 'url("../assets/dot.svg")'
     }
   }
 
