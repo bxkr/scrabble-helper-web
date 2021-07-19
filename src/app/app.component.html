@@ -6,7 +6,10 @@
     </tr>
   </table>
   <div class=b-table>
-    <div *ngFor="let id of cell_range()" [id]="id" (click)="onCellTouch($event)" class=board></div>
+    <div *ngFor="let id of cell_range()" [id]="id" (click)="onCellTouch($event)" class=board>
+      <span *ngIf="!setIncludes(id)"></span>
+      <div *ngIf="setIncludes(id)" class=letter>{{cells_letters[id]}}</div>
+    </div>
   </div>
   <div id=clear *ngIf=setting_word (click)="clearClicked()">
     <button mat-stroked-button>Очистить нажатые плитки</button>

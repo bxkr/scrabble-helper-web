@@ -26,6 +26,10 @@
   background-image: url('../assets/double-star.svg');
 }
 
+#З8 > span {
+  color: white;
+}
+
 #general {
   width: 100%;
   height: auto;
@@ -41,4 +45,14 @@
   width: 5vh;
   height: 5vh;
   user-select: none;
+}
+
+.letter {
+  width: 2.5vh;
+  height: 2.5vh;
+  background-color: wheat;
+  margin: auto;
+  top: 1.25vh;
+  transform: translateY(50%);
+  line-height: 2.5vh;
 }

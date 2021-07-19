@@ -1,6 +1,10 @@
-import { AfterViewInit, Component } from '@angular/core';
+import {AfterViewInit, Component, HostListener} from '@angular/core';
 import { numberRange } from "../scripts/range";
 import { read_json } from "../scripts/json";
+
+interface cell_obj {
+  [id: string]: any
+}
 
 @Component({
   selector: 'app-root',
@@ -10,11 +14,16 @@ import { read_json } from "../scripts/json";
 export class AppComponent implements AfterViewInit {
   title = 'scrabble-helper'
   row_range = numberRange(1, 16)
-  clicked_cells: object = {}
+  clicked_cells: cell_obj = {}
+  set_cells: cell_obj = {}
+  cells_letters: cell_obj = {}
   setting_word = false
   direction: string | undefined;
   dir_ref: string | undefined;
   alpha_arr = Array.from(String.fromCharCode(...[...Array('О'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))));
+  first_arr = Array.from(String.fromCharCode(...[...Array('Я'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))));
+  second_arr = Array.from(String.fromCharCode(...[...Array('я'.charCodeAt(0) - 'а'.charCodeAt(0) + 1).keys()].map(i => i + 'а'.charCodeAt(0))));
+  result_arr = this.first_arr.concat(this.second_arr)
   cell_range(): string[] {
     let result: string[] = [];
     this.row_range.forEach((nb) => {
@@ -33,7 +42,6 @@ export class AppComponent implements AfterViewInit {
         })
       })
     })
-    document.addEventListener('keydown', this.keyDown)
   }
 
   public onCellTouch(cell: any): void {
@@ -73,55 +81,40 @@ export class AppComponent implements AfterViewInit {
       if (cell.target.style.backgroundColor == 'rgb(255, 0, 0)') {
         cell.target.style.backgroundImage = 'url("../assets/dot.svg")'
       }
-      cell.target.innerText = 'Буква ' + Object.keys(this.clicked_cells).length
+      cell.target.children[0].innerText = 'Буква ' + (Object.keys(this.clicked_cells).length + Object.keys(this.set_cells).length)
     }
   }
 
   public clearClicked(): void {
-    Object.values(this.clicked_cells).forEach( (el) => {
+    Object.values(this.clicked_cells).concat(Object.values(this.set_cells)).forEach( (el) => {
       el.target.style.outlineColor = 'black'
       if (el.target.style.backgroundImage == 'url("../assets/dot.svg")') {
         el.target.style.backgroundImage = ''
       }
-      el.target.innerText = ''
+      el.target.children[0].innerText = ''
     })
+    this.set_cells = {}
+    this.cells_letters = {}
     this.clicked_cells = {}
     this.setting_word = false
     this.direction = undefined
     this.dir_ref = undefined
   }
 
-  public keyDown(ev: KeyboardEvent): void {
-    let l: string | undefined
-    if (ev.code.includes('Key')) {
-      switch (ev.key) {
-        case 'q': {l = 'й'; break}
-        case 'w': {l = 'ц'; break}
-        case 'e': {l = 'у'; break}
-        case 'r': {l = 'к'; break}
-        case 't': {l = 'е'; break}
-        case 'y': {l = 'н'; break}
-        case 'u': {l = 'г'; break}
-        case 'i': {l = 'ш'; break}
-        case 'o': {l = 'щ'; break}
-        case 'p': {l = 'з'; break}
-        case 'a': {l = 'ф'; break}
-        case 's': {l = 'ы'; break}
-        case 'd': {l = 'в'; break}
-        case 'f': {l = 'а'; break}
-        case 'g': {l = 'п'; break}
-        case 'h': {l = 'р'; break}
-        case 'j': {l = 'о'; break}
-        case 'k': {l = 'л'; break}
-        case 'l': {l = 'д'; break}
-        case 'z': {l = 'я'; break}
-        case 'x': {l = 'ч'; break}
-        case 'c': {l = 'с'; break}
-        case 'v': {l = 'м'; break}
-        case 'b': {l = 'и'; break}
-        case 'n': {l = 'т'; break}
-        case 'm': {l = 'ь'; break}
-      }
+  @HostListener('document:keydown', ['$event']) keyDown(ev: KeyboardEvent): void {
+    let l = ev.key
+    if (this.result_arr.includes(l) && Object.keys(this.clicked_cells).length > 0) {
+      Object.assign(this.set_cells, {
+        [Object.values(this.clicked_cells)[0].target.id]: Object.values(this.clicked_cells)[0]
+      })
+      Object.assign(this.cells_letters, {
+        [Object.values(this.clicked_cells)[0].target.id]: l
+      })
+      delete this.clicked_cells[Object.values(this.clicked_cells)[0].target.id]
     }
+  }
+
+  public setIncludes(id: string): boolean {
+    return Object.keys(this.set_cells).includes(id)
   }
 }
