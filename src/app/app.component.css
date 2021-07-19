@@ -8,6 +8,8 @@
   height: 5vh;
   user-select: none;
   outline: 2px solid black;
+  font-size: 1.2vh;
+  line-height: 5vh;
 }
 
 .b-table {
