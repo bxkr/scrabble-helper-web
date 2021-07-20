@@ -99,9 +99,21 @@
             ],
             "scripts": []
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
-  "defaultProject": "scrabble-helper"
+  "defaultProject": "scrabble-helper",
+  "cli": {
+    "defaultCollection": "@angular-eslint/schematics"
+  }
 }

@@ -1,17 +1,17 @@
-<div id=general>
+<div id="general">
   <h2>{{title}}</h2>
   <table id=alpha>
     <tr>
-      <th *ngFor="let letter of alpha_arr" [innerText]=letter></th>
+      <th *ngFor="let letter of boardAlphabeticalArray" [innerText]="letter"></th>
     </tr>
   </table>
-  <div class=b-table>
-    <div *ngFor="let id of cell_range()" [id]="id" (click)="onCellTouch($event)" class=board>
+  <div class="b-table">
+    <div *ngFor="let id of cellRange()" [id]="id" (click)="onCellTouch($event)" [style.backgroundColor]="getBackground(id)" class="board">
       <span *ngIf="!setIncludes(id)"></span>
-      <div *ngIf="setIncludes(id)" class=letter>{{cells_letters[id]}}</div>
+      <div *ngIf="setIncludes(id)" class="letter">{{cellsLetters[id]}}</div>
     </div>
   </div>
-  <div id=clear *ngIf=setting_word (click)="clearClicked()">
+  <div id="clear" (click)="clearClicked()">
     <button mat-stroked-button>Очистить нажатые плитки</button>
   </div>
 </div>

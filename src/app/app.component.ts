@@ -1,120 +1,169 @@
-import {AfterViewInit, Component, HostListener} from '@angular/core';
-import { numberRange } from "../scripts/range";
-import { read_json } from "../scripts/json";
+import { OnInit, Component, HostListener } from '@angular/core';
+import { numberRange } from '../scripts/range';
+import { readJson } from '../scripts/json';
+import generateAlphabeticalArray from '../scripts/alphabetical';
 
-interface cell_obj {
-  [id: string]: any
+interface CellObj {
+  [id: string]: MouseEvent;
+}
+
+interface CellColors {
+  [id: string]: string;
 }
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements AfterViewInit {
-  title = 'scrabble-helper'
-  row_range = numberRange(1, 16)
-  clicked_cells: cell_obj = {}
-  set_cells: cell_obj = {}
-  cells_letters: cell_obj = {}
-  setting_word = false
+export class AppComponent implements OnInit {
+  title = 'scrabble-helper';
+
+  rowRange = numberRange(1, 16);
+
+  clickedCells: CellObj = {};
+
+  setCells: CellObj = {};
+
+  cellsLetters: CellObj = {};
+
+  cellsColors: CellColors = {};
+
   direction: string | undefined;
-  dir_ref: string | undefined;
-  alpha_arr = Array.from(String.fromCharCode(...[...Array('О'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))));
-  first_arr = Array.from(String.fromCharCode(...[...Array('Я'.charCodeAt(0) - 'А'.charCodeAt(0) + 1).keys()].map(i => i + 'А'.charCodeAt(0))));
-  second_arr = Array.from(String.fromCharCode(...[...Array('я'.charCodeAt(0) - 'а'.charCodeAt(0) + 1).keys()].map(i => i + 'а'.charCodeAt(0))));
-  result_arr = this.first_arr.concat(this.second_arr)
-  cell_range(): string[] {
-    let result: string[] = [];
-    this.row_range.forEach((nb) => {
-    this.alpha_arr.forEach((lt) => {
-        result.push(lt + nb.toString())
-      })
-    })
-    return result
+
+  directionHint: string | undefined;
+
+  boardAlphabeticalArray = generateAlphabeticalArray('А', 'О');
+
+  firstLetterAlphabeticalArray = generateAlphabeticalArray('А', 'Я');
+
+  secondLetterAlphabeticalArray = generateAlphabeticalArray('а', 'я');
+
+  resultLetterAlphabeticalArray = this.firstLetterAlphabeticalArray.concat(
+    this.secondLetterAlphabeticalArray,
+  );
+
+  cellRange(): string[] {
+    const result: string[] = [];
+    this.rowRange.forEach((nb) => {
+      this.boardAlphabeticalArray.forEach((lt) => {
+        result.push(lt + nb.toString());
+      });
+    });
+    return result;
   }
 
-  ngAfterViewInit(): void {
-    read_json('../assets/tile-colors.json').then( (colors) => {
-      Object.entries(colors).forEach((ca: any[]) => {
-        ca[1].forEach((cell: string) => {
-          document.getElementById(cell)!.style.backgroundColor = ca[0]
-        })
-      })
-    })
+  getBackground(id: string): string {
+    if (Object.keys(this.cellsColors).includes(id)) {
+      return this.cellsColors[id];
+    }
+    return 'darkgreen';
   }
 
-  public onCellTouch(cell: any): void {
-    this.setting_word = true
-    if (cell.target.id.length == 2) {
-      if (this.direction == undefined || cell.target.id[0] == this.dir_ref || cell.target.id[1] == this.dir_ref) {
-        if (Object.keys(this.clicked_cells).length == 0 || cell.target.id[0] == Object.keys(this.clicked_cells)[0][0] || cell.target.id[1] == Object.keys(this.clicked_cells)[0][1]) {
-          this.cellOk(cell)
+  ngOnInit(): void {
+    readJson('../assets/tile-colors.json').then((colors) => {
+      Object.entries(colors).forEach((colorArray: [string, string[] | unknown]) => {
+        (<string[]>colorArray[1]).forEach((cell: string) => {
+          Object.assign(this.cellsColors, { [cell]: colorArray[0] });
+        });
+      });
+    });
+  }
+
+  public onCellTouch(cell: MouseEvent): void {
+    const cellId = (<HTMLDivElement>cell.target).id;
+    const clickedKeys = Object.keys(this.clickedCells);
+    if (cellId.length === 2) {
+      if (
+        this.direction === undefined ||
+        cellId[0] === this.directionHint ||
+        cellId[1] === this.directionHint
+      ) {
+        if (
+          clickedKeys.length === 0 ||
+          cellId[0] === clickedKeys[0][0] ||
+          cellId[1] === clickedKeys[0][1]
+        ) {
+          this.cellOk(cell);
         }
       }
-    } else if (cell.target.id.length == 3) {
-      if (this.direction == undefined || cell.target.id[0] == this.dir_ref || cell.target.id[1] + cell.target.id[2] == this.dir_ref) {
-        if (Object.keys(this.clicked_cells).length == 0 || cell.target.id[0] == Object.keys(this.clicked_cells)[0][0] || cell.target.id[1] + cell.target.id[2] == Object.keys(this.clicked_cells)[0][1] + Object.keys(this.clicked_cells)[0][2]) {
-          this.cellOk(cell)
+    } else if (cellId.length === 3) {
+      if (
+        this.direction === undefined ||
+        cellId[0] === this.directionHint ||
+        cellId[1] + cellId[2] === this.directionHint
+      ) {
+        if (
+          clickedKeys.length === 0 ||
+          cellId[0] === clickedKeys[0][0] ||
+          cellId[1] + cellId[2] === clickedKeys[0][1] + clickedKeys[0][2]
+        ) {
+          this.cellOk(cell);
         }
       }
     }
-    if (this.direction == undefined && Object.keys(this.clicked_cells).length == 2) {
-      if (Object.keys(this.clicked_cells)[0][0] == Object.keys(this.clicked_cells)[1][0]) {
-        this.direction = 'v'
-        this.dir_ref = Object.keys(this.clicked_cells)[0][0]
-      } else if (Object.keys(this.clicked_cells)[0][1] == Object.keys(this.clicked_cells)[1][1]) {
-        this.direction = 'h'
-        if (Object.keys(this.clicked_cells)[0].length == 2) {
-          this.dir_ref = Object.keys(this.clicked_cells)[0][1]
-        } else if (Object.keys(this.clicked_cells)[0].length == 3) {
-          this.dir_ref = Object.keys(this.clicked_cells)[0][1] + Object.keys(this.clicked_cells)[0][2]
+    if (this.direction === undefined && clickedKeys.length === 2) {
+      if (clickedKeys[0][0] === clickedKeys[1][0]) {
+        [this.direction, this.directionHint] = ['v', clickedKeys[0][0]];
+      } else if (clickedKeys[0][1] === clickedKeys[1][1]) {
+        this.direction = 'h';
+        if (clickedKeys[0].length === 2) {
+          [this.directionHint] = [clickedKeys[0][1]];
+        } else if (clickedKeys[0].length === 3) {
+          this.directionHint = clickedKeys[0][1] + clickedKeys[0][2];
         }
       }
     }
   }
 
-  public cellOk(cell: any): void {
-    if (!(Object.values(this.clicked_cells).includes(cell.target))){
-      Object.assign(this.clicked_cells, {[cell.target.id]: cell})
-      cell.target.style.outlineColor = 'red'
-      if (cell.target.style.backgroundColor == 'rgb(255, 0, 0)') {
-        cell.target.style.backgroundImage = 'url("../assets/dot.svg")'
+  public cellOk(cell: MouseEvent): void {
+    const target = <HTMLDivElement>cell.target;
+    if (!Object.values(this.clickedCells).includes(<never>target)) {
+      Object.assign(this.clickedCells, { [target.id]: cell });
+      target.style.outlineColor = 'red';
+      if (target.style.backgroundColor === 'rgb(255, 0, 0)') {
+        target.style.backgroundImage = 'url("../assets/dot.svg")';
       }
-      cell.target.children[0].innerText = 'Буква ' + (Object.keys(this.clicked_cells).length + Object.keys(this.set_cells).length)
+      target.children[0].innerHTML = `Буква ${Object.keys(this.clickedCells).length}`;
     }
   }
 
   public clearClicked(): void {
-    Object.values(this.clicked_cells).concat(Object.values(this.set_cells)).forEach( (el) => {
-      el.target.style.outlineColor = 'black'
-      if (el.target.style.backgroundImage == 'url("../assets/dot.svg")') {
-        el.target.style.backgroundImage = ''
-      }
-      el.target.children[0].innerText = ''
-    })
-    this.set_cells = {}
-    this.cells_letters = {}
-    this.clicked_cells = {}
-    this.setting_word = false
-    this.direction = undefined
-    this.dir_ref = undefined
+    Object.values(this.clickedCells)
+      .concat(Object.values(this.setCells))
+      .forEach((el) => {
+        const target = <HTMLDivElement>el.target;
+        target.style.outlineColor = 'black';
+        if (target.style.backgroundImage === 'url("../assets/dot.svg")') {
+          target.style.backgroundImage = '';
+        }
+        target.children[0].innerHTML = '';
+      });
+    this.setCells = {};
+    this.cellsLetters = {};
+    this.clickedCells = {};
+    this.direction = undefined;
+    this.directionHint = undefined;
   }
 
   @HostListener('document:keydown', ['$event']) keyDown(ev: KeyboardEvent): void {
-    let l = ev.key
-    if (this.result_arr.includes(l) && Object.keys(this.clicked_cells).length > 0) {
-      Object.assign(this.set_cells, {
-        [Object.values(this.clicked_cells)[0].target.id]: Object.values(this.clicked_cells)[0]
-      })
-      Object.assign(this.cells_letters, {
-        [Object.values(this.clicked_cells)[0].target.id]: l
-      })
-      delete this.clicked_cells[Object.values(this.clicked_cells)[0].target.id]
+    const pushedLetter = ev.key;
+    if (
+      this.resultLetterAlphabeticalArray.includes(pushedLetter) &&
+      Object.keys(this.clickedCells).length > 0
+    ) {
+      const lastId = (<HTMLDivElement>Object.values(this.clickedCells)[0].target).id;
+      Object.assign(this.setCells, {
+        [lastId]: Object.values(this.clickedCells)[0],
+      });
+      Object.assign(this.cellsLetters, {
+        [lastId]: pushedLetter,
+      });
+      delete this.clickedCells[lastId];
     }
   }
 
   public setIncludes(id: string): boolean {
-    return Object.keys(this.set_cells).includes(id)
+    return Object.keys(this.setCells).includes(id);
   }
 }
