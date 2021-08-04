@@ -7,7 +7,7 @@
     </table>
     <div class="b-table">
       <div *ngFor="let id of cellRange()" [id]="id" (click)="cellOk($event)" [style.backgroundColor]="getBackground(id)" class="board">
-        <span *ngIf="!setIncludes(id)"></span>
+        <span class="letter-number"></span>
         <div *ngIf="setIncludes(id)" class="letter">{{cellsLetters[id]}}</div>
       </div>
     </div>
@@ -15,14 +15,12 @@
       <button mat-stroked-button>Очистить нажатые плитки</button>
     </div>
   </div>
-  <div id="game-menu" cdkDrag cdkDragBoundary="#general">
-    <p>
-      <mat-toolbar>
-        {{menuTitle}}
-        <span id="toolbar-spacer"></span>
-        <mat-icon cdkDragHandle>drag_indicator</mat-icon>
-      </mat-toolbar>
-      <mat-divider></mat-divider>
+  <p id="game-menu" cdkDrag cdkDragBoundary="#general">
+    <mat-toolbar>
+      {{menuTitle}}
+      <span id="toolbar-spacer"></span>
+      <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+    </mat-toolbar>
+    <mat-divider></mat-divider>
   </p>
-  </div>
 </div>

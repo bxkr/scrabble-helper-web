@@ -19,6 +19,8 @@ interface CellColors {
 export class AppComponent implements OnInit {
   menuTitle = 'Игровое меню';
 
+  mode = 'ожидание';
+
   rowRange = numberRange(1, 16);
 
   clickedCells: CellObj = {};
@@ -67,14 +69,18 @@ export class AppComponent implements OnInit {
   }
 
   public cellOk(cell: MouseEvent): void {
-    const target = <HTMLDivElement>cell.target;
-    if (!Object.values(this.clickedCells).includes(<never>target)) {
+    let target = <HTMLDivElement>cell.target;
+    if (target.className !== 'board') {
+      target = <HTMLDivElement>target.parentElement;
+    }
+    if (!Object.values(this.clickedCells).includes(<never>target.id)) {
       Object.assign(this.clickedCells, { [target.id]: cell });
-      target.style.outlineColor = 'red';
       if (target.style.backgroundColor === 'rgb(255, 0, 0)') {
         target.style.backgroundImage = 'url("../assets/dot.svg")';
       }
-      target.children[0].innerHTML = `Буква ${Object.keys(this.clickedCells).length}`;
+      (<HTMLSpanElement>target.querySelector('.letter-number')).innerText = `Буква ${
+        Object.keys(this.clickedCells).length
+      }`;
     }
   }
 
@@ -83,7 +89,6 @@ export class AppComponent implements OnInit {
       .concat(Object.values(this.setCells))
       .forEach((el) => {
         const target = <HTMLDivElement>el.target;
-        target.style.outlineColor = 'black';
         if (target.style.backgroundImage === 'url("../assets/dot.svg")') {
           target.style.backgroundImage = '';
         }
