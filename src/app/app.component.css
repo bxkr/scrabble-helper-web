@@ -59,11 +59,12 @@
 #game-menu {
   top: 25%;
   left: 8%;
-  width: 20vw;
-  height: 20vw;
+  width: 400px;
+  height: 500px;
   border: solid 1px #ccc;
   color: rgba(0, 0, 0, 0.87);
-  display: flex;
+  display: block;
+  text-align: left;
   background: #fff;
   border-radius: 4px;
   position: absolute;
@@ -80,15 +81,15 @@
               0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
-#game-menu > p {
-  width: inherit;
-}
-
-#game-menu > p > mat-toolbar {
+#game-menu > mat-toolbar {
   border-radius: 4px 4px 0 0;
 }
 
-#game-menu > p > mat-toolbar > mat-icon {
+#game-menu > mat-progress-bar {
+  height: 1px;
+}
+
+#menu-drag-indicator {
   cursor: move;
 }
 
@@ -98,4 +99,28 @@
 
 #game-board {
   margin-top: 1.3%;
+}
+
+#start-game {
+  margin: 3%;
+}
+
+#playersSet {
+  width: 20vw;
+  height: 15vw;
+}
+
+#languageChoice {
+  position: absolute;
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2),
+              0 2px 2px 0 rgba(0, 0, 0, 0.14),
+              0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  left: 95vw;
+  top: 95vh;
+  transform: translate(-50%,-50%);
+}
+
+.lang-icon {
+  width: 50%;
 }

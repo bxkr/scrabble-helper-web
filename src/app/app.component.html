@@ -2,25 +2,38 @@
   <div id=game-board>
     <table id="alpha">
       <tr>
-        <th *ngFor="let letter of boardAlphabeticalArray" [innerText]="letter"></th>
+        <th *ngFor="let letter of arrays.board_additional[language]" [innerText]="letter"></th>
       </tr>
     </table>
     <div class="b-table">
       <div *ngFor="let id of cellRange()" [id]="id" (click)="cellOk($event)" [style.backgroundColor]="getBackground(id)" class="board">
-        <span class="letter-number"></span>
+        <span class="letter-number" *ngIf="!setIncludes(id) && clickedIncludes(id)">{{labels.letter[language]}} {{getNumber(id)}}</span>
         <div *ngIf="setIncludes(id)" class="letter">{{cellsLetters[id]}}</div>
       </div>
     </div>
     <div id="clear" (click)="clearClicked()">
-      <button mat-stroked-button>Очистить нажатые плитки</button>
+      <button mat-stroked-button>{{labels.clear[language]}}</button>
     </div>
   </div>
-  <p id="game-menu" cdkDrag cdkDragBoundary="#general">
+  <div id="game-menu" cdkDrag cdkDragBoundary="#general">
     <mat-toolbar>
-      {{menuTitle}}
+      {{labels.menu[language]}}
       <span id="toolbar-spacer"></span>
-      <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+      <mat-icon cdkDragHandle id="menu-drag-indicator">drag_indicator</mat-icon>
     </mat-toolbar>
-    <mat-divider></mat-divider>
-  </p>
+    <mat-divider *ngIf="mode === 'settings'"></mat-divider>
+    <mat-progress-bar mode="indeterminate" *ngIf="mode !== 'settings'" [@smooth]></mat-progress-bar>
+    <div id="playersSet" *ngIf="mode === 'settings'">
+      <h3>{{labels.players[language]}} [WIP]</h3>
+    </div>
+    <div id="start-game" *ngIf="mode === 'settings'" [@smooth] (click)="startGame()">
+      <button mat-stroked-button>{{labels.done[language]}}</button>
+    </div>
+  </div>
+</div>
+<div id="languageChoice">
+    <mat-button-toggle-group name="Language" aria-label="Font Style">
+      <mat-button-toggle (change)="language = 'english'" class="lang-toggle" checked><img alt="English" src="../assets/english.png" class="lang-icon"></mat-button-toggle>
+      <mat-button-toggle (change)="language = 'russian'" class="lang-toggle"><img alt="Russian" src="../assets/russian.png" class="lang-icon"></mat-button-toggle>
+  </mat-button-toggle-group>
 </div>

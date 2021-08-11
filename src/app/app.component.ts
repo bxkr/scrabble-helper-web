@@ -1,7 +1,9 @@
 import { OnInit, Component, HostListener } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { trigger, style, animate, transition } from '@angular/animations';
 import { numberRange } from '../scripts/range';
 import { readJson } from '../scripts/json';
+import { labels, arrays } from '../assets/localized';
 import generateAlphabeticalArray from '../scripts/alphabetical';
 
 interface CellObj {
@@ -11,15 +13,33 @@ interface CellObj {
 interface CellColors {
   [id: string]: string;
 }
+
+interface Player {
+  id: number;
+  name: string;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  animations: [
+    trigger('smooth', [
+      transition(':enter', [style({ opacity: 0 }), animate('.5s ease-out', style({ opacity: 1 }))]),
+      transition(':leave', [style({ opacity: 1 }), animate('.5s ease-in', style({ opacity: 0 }))]),
+    ]),
+  ],
 })
 export class AppComponent implements OnInit {
-  menuTitle = 'Игровое меню';
+  language = 'english';
 
-  mode = 'ожидание';
+  labels = labels;
+
+  arrays = arrays;
+
+  mode = 'settings';
+
+  players: Player[] = [];
 
   rowRange = numberRange(1, 16);
 
@@ -30,8 +50,6 @@ export class AppComponent implements OnInit {
   cellsLetters: CellObj = {};
 
   cellsColors: CellColors = {};
-
-  boardAlphabeticalArray = generateAlphabeticalArray('А', 'О');
 
   russianAlphabeticalArray = generateAlphabeticalArray('А', 'Я').concat(
     generateAlphabeticalArray('а', 'я'),
@@ -44,7 +62,7 @@ export class AppComponent implements OnInit {
   cellRange(): string[] {
     const result: string[] = [];
     this.rowRange.forEach((nb) => {
-      this.boardAlphabeticalArray.forEach((lt) => {
+      generateAlphabeticalArray('А', 'О').forEach((lt) => {
         result.push(lt + nb.toString());
       });
     });
@@ -68,19 +86,13 @@ export class AppComponent implements OnInit {
     });
   }
 
-  public cellOk(cell: MouseEvent): void {
-    let target = <HTMLDivElement>cell.target;
-    if (target.className !== 'board') {
-      target = <HTMLDivElement>target.parentElement;
-    }
-    if (!Object.values(this.clickedCells).includes(<never>target.id)) {
-      Object.assign(this.clickedCells, { [target.id]: cell });
+  public cellOk(cell: MouseEvent | PointerEvent): void {
+    const target = <HTMLElement>cell.target;
+    if (!Object.keys(this.clickedCells).includes(<never>target.id)) {
+      Object.assign(this.clickedCells, { [target.id]: <MouseEvent>cell });
       if (target.style.backgroundColor === 'rgb(255, 0, 0)') {
         target.style.backgroundImage = 'url("../assets/dot.svg")';
       }
-      (<HTMLSpanElement>target.querySelector('.letter-number')).innerText = `Буква ${
-        Object.keys(this.clickedCells).length
-      }`;
     }
   }
 
@@ -108,7 +120,7 @@ export class AppComponent implements OnInit {
     ) {
       this.setLetter(pushedLetter);
     } else if (this.englishAlphabeticArray.includes(pushedLetter)) {
-      this.snackBar.open('Переключите раскладку!', undefined, { duration: 1000 });
+      this.snackBar.open(labels.letter_error[this.language], undefined, { duration: 1000 });
     }
   }
 
@@ -125,5 +137,17 @@ export class AppComponent implements OnInit {
 
   public setIncludes(id: string): boolean {
     return Object.keys(this.setCells).includes(id);
+  }
+
+  public clickedIncludes(id: string): boolean {
+    return Object.keys(this.clickedCells).includes(id);
+  }
+
+  public startGame(): void {
+    this.mode = this.mode === 'settings' ? 'waiting' : 'settings';
+  }
+
+  public getNumber(id: string): number {
+    return Object.keys(this.clickedCells).indexOf(id);
   }
 }

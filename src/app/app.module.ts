@@ -8,7 +8,9 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AppComponent } from './app.component';
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
 @NgModule({
   declarations: [AppComponent],
@@ -21,6 +23,8 @@ import { AppComponent } from './app.component';
     MatToolbarModule,
     MatDividerModule,
     MatIconModule,
+    MatProgressBarModule,
+    MatButtonToggleModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
