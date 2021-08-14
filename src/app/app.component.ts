@@ -29,6 +29,8 @@ interface CellAny {
 export class AppComponent implements OnInit {
   language = 'english';
 
+  scoreRaw = scoreRaw;
+
   labels = labels;
 
   arrays = arrays;

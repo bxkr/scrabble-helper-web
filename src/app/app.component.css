@@ -8,6 +8,9 @@
   outline: 2px solid black;
   font-size: 1.2vh;
   line-height: 5vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .b-table {
@@ -47,13 +50,27 @@
 }
 
 .letter {
-  width: 2.5vh;
-  height: 2.5vh;
+  width: 90%;
+  height: 90%;
   background-color: wheat;
   margin: auto;
-  top: 1.25vh;
-  transform: translateY(50%);
-  line-height: 2.5vh;
+  font-size: 3vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0.5vh;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.letter_score {
+  font-weight: bold;
+  font-size: 1vh;
+  position: relative;
+  top: 1vh;
+  left: 0.5vh;
 }
 
 #game-menu {
