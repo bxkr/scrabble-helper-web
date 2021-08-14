@@ -9,8 +9,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { AppComponent } from './app.component';
-import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
 @NgModule({
   declarations: [AppComponent],

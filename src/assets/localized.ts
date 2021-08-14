@@ -13,13 +13,17 @@ interface Arrays {
 }
 
 export const labels: Labels = {
+  score: {
+    english: 'Score for your word',
+    russian: 'Очки за ваше слово',
+  },
   players: {
     english: 'Players',
     russian: 'Игроки',
   },
   layout: {
-    english: 'Toggle the layout or choose the normal letter!',
-    russian: 'Переключите раскладку или выберите нормальную букву!',
+    english: 'Toggle the layout!',
+    russian: 'Переключите раскладку!',
   },
   clear: {
     english: 'Clear clicked cells',
@@ -40,12 +44,10 @@ export const labels: Labels = {
 };
 
 export const arrays: Arrays = {
-  board_additional: {
-    english: generateAlphabeticalArray('A', 'O'),
-    russian: generateAlphabeticalArray('А', 'О'),
-  },
-  letter_check: {
-    english: generateAlphabeticalArray('A', 'z'),
-    russian: generateAlphabeticalArray('А', 'я'),
+  board: {
+    english: generateAlphabeticalArray('A', 'Z')
+      .concat(generateAlphabeticalArray('a', 'z'))
+      .concat([' ']),
+    russian: generateAlphabeticalArray('А', 'я').concat([' ']),
   },
 };
