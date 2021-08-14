@@ -8,7 +8,7 @@
     <div class="b-table">
       <div *ngFor="let id of cellRange()" [id]="id" (mousemove)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null" (click)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null" [style.backgroundColor]="getBackground(id)" class="board">
         <span class="letter-number" *ngIf="!setIncludes(id) && clickedIncludes(id)">{{labels.letter[language]}} {{getNumber(id)+1}}</span>
-        <div *ngIf="setIncludes(id)" class="letter">
+        <div *ngIf="setIncludes(id)" class="letter" [@smooth]>
           {{ cellsLetters[id].toString().toUpperCase() }}
           <div class="letter_score">
             {{ scoreRaw(this.language)[cellsLetters[id].toString().toUpperCase()] }}
@@ -37,7 +37,7 @@
       </mat-form-field>
     </div>
     <mat-list id="player-list">
-      <mat-list-item *ngFor="let player of players">{{players.indexOf(player)+1}}. {{player}}</mat-list-item>
+      <mat-list-item *ngFor="let player of players" [@smooth]>{{players.indexOf(player)+1}}. {{player}}</mat-list-item>
     </mat-list>
     <div id="start-game" *ngIf="mode === 'settings'" [@smooth] (click)="startGame()">
       <button mat-stroked-button>{{labels.done[language]}}</button>
