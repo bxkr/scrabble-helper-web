@@ -10,6 +10,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -25,6 +28,9 @@ import { AppComponent } from './app.component';
     MatIconModule,
     MatProgressBarModule,
     MatButtonToggleModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatListModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

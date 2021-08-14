@@ -13,6 +13,14 @@ interface Arrays {
 }
 
 export const labels: Labels = {
+  playerNamePlaceholder: {
+    english: 'Joe',
+    russian: 'Владимир',
+  },
+  addPlayer: {
+    english: 'Add player',
+    russian: 'Добавить игрока',
+  },
   score: {
     english: 'Score for your word',
     russian: 'Очки за ваше слово',

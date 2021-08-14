@@ -23,9 +23,17 @@
     </mat-toolbar>
     <mat-divider *ngIf="mode === 'settings'"></mat-divider>
     <mat-progress-bar mode="indeterminate" *ngIf="mode !== 'settings'" [@smooth]></mat-progress-bar>
-    <div id="playersSet" *ngIf="mode === 'settings'" [@smooth]>
-      <h3>{{labels.players[language]}} [WIP]</h3>
+    <div id="players-set" *ngIf="mode === 'settings'" [@smooth]>
+      <h3>{{labels.players[language]}}</h3>
+      <mat-form-field appearance="standard">
+        <mat-label>{{this.labels.addPlayer[language]}}</mat-label>
+        <input matInput [placeholder]="this.labels.playerNamePlaceholder[language]" #playerName (keydown.enter)="players.push(playerName.value); playerName.value = ''">
+        <button matSuffix mat-icon-button (click)="players.push(playerName.value); playerName.value = ''"><mat-icon>add</mat-icon></button>
+      </mat-form-field>
     </div>
+    <mat-list id="player-list">
+      <mat-list-item *ngFor="let player of players">{{players.indexOf(player)+1}}. {{player}}</mat-list-item>
+    </mat-list>
     <div id="start-game" *ngIf="mode === 'settings'" [@smooth] (click)="startGame()">
       <button mat-stroked-button>{{labels.done[language]}}</button>
     </div>

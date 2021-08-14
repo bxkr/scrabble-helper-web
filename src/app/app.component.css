@@ -63,7 +63,8 @@
   height: 500px;
   border: solid 1px #ccc;
   color: rgba(0, 0, 0, 0.87);
-  display: block;
+  display: flex;
+  flex-direction: column;
   text-align: left;
   background: #fff;
   border-radius: 4px;
@@ -101,13 +102,27 @@
   margin-top: 1.3%;
 }
 
-#start-game {
-  margin: 3%;
+#players-set {
+  width: 20vw;
+  margin: 1vw;
+  height: min-content;
+  align-self: flex-start;
 }
 
-#playersSet {
-  width: 20vw;
-  height: 15vw;
+#player-list {
+  align-items: flex-start;
+  overflow: auto;
+  height: 28vh;
+  z-index: 1;
+  margin-left: 1vw;
+  margin-right: 1vw;
+}
+
+#start-game {
+  position: relative;
+  align-self: flex-end;
+  margin: 1vw;
+  z-index: 2;
 }
 
 #languageChoice {

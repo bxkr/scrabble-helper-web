@@ -15,11 +15,6 @@ interface CellAny {
   [id: string]: string;
 }
 
-interface Player {
-  id: number;
-  name: string;
-}
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -40,7 +35,7 @@ export class AppComponent implements OnInit {
 
   mode = 'settings';
 
-  players: Player[] = [];
+  players: string[] = [];
 
   rowRange = numberRange(1, 16);
 
@@ -120,7 +115,6 @@ export class AppComponent implements OnInit {
         }
         target.children[0].innerHTML = '';
       });
-    this.mode = 'waiting';
     this.setCells = {};
     this.cellsLetters = {};
     this.clickedCells = {};
@@ -136,7 +130,10 @@ export class AppComponent implements OnInit {
     ) {
       this.setLetter(pushedLetter);
     } else if (
-      this.arrays.board[this.language === 'russian' ? 'english' : 'russian'].includes(pushedLetter)
+      this.arrays.board[this.language === 'russian' ? 'english' : 'russian'].includes(
+        pushedLetter,
+      ) &&
+      pushedLetter !== ' '
     ) {
       this.snackBar.open(labels.layout[this.language], undefined, { duration: 1000 });
     }
@@ -165,7 +162,7 @@ export class AppComponent implements OnInit {
       this.snackBar.open(`${this.labels.score[this.language]}: ${resultScore}`, undefined, {
         duration: 1000,
       });
-      this.clearClicked();
+      this.mode = 'waiting';
     }
   }
 
