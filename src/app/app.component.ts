@@ -33,6 +33,7 @@ interface Player {
 })
 export class AppComponent implements OnInit {
   language = 'english';
+  scoreRaw = scoreRaw;
 
   labels = labels;
 
