@@ -7,10 +7,10 @@
     </table>
     <div class="b-table">
       <div *ngFor="let id of cellRange()" [id]="id" (mousemove)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null" (click)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null" [style.backgroundColor]="getBackground(id)" class="board">
-        <span class="letter-number" *ngIf="!setIncludes(id) && clickedIncludes(id)">{{labels.letter[language]}} {{getNumber(id)+1}}</span>
-        <div *ngIf="setIncludes(id)" class="letter" [@smooth]>
+        <span class="letter-number" *ngIf="!setIncludes(id) && clickedIncludes(id)" [@slideDown] [@smooth]>{{labels.letter[language]}} {{getNumber(id)+1}}</span>
+        <div *ngIf="setIncludes(id)" class="letter" [@smooth] [@slideUp]>
           {{ cellsLetters[id].toString().toUpperCase() }}
-          <div class="letter_score">
+          <div class="letter-score">
             {{ scoreRaw(this.language)[cellsLetters[id].toString().toUpperCase()] }}
           </div>
         </div>
