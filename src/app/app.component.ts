@@ -1,6 +1,7 @@
-import { OnInit, Component, HostListener } from '@angular/core';
+import { OnInit, Component, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { trigger, style, animate, transition } from '@angular/animations';
+import { CookieService } from 'ngx-cookie';
 import { numberRange } from '../scripts/range';
 import { readJson } from '../scripts/json';
 import { labels, arrays } from '../assets/localized';
@@ -13,6 +14,12 @@ interface CellObj {
 
 interface CellAny {
   [id: string]: string;
+}
+
+interface Player {
+  id: number;
+  name: string;
+  score: number;
 }
 
 @Component({
@@ -41,6 +48,10 @@ interface CellAny {
   ],
 })
 export class AppComponent implements OnInit {
+  @ViewChild('table') tableRef: ElementRef | undefined;
+
+  window = window;
+
   language = 'english';
 
   scoreRaw = scoreRaw;
@@ -51,19 +62,25 @@ export class AppComponent implements OnInit {
 
   mode = 'settings';
 
-  players: string[] = [];
+  players: Player[] = [];
+
+  turn: number = 0;
 
   rowRange = numberRange(1, 16);
 
   clickedCells: CellObj = {};
 
+  nowCells: CellObj = {};
+
   setCells: CellObj = {};
 
   cellsLetters: CellAny = {};
 
+  nowLetters: CellAny = {};
+
   cellsColors: CellAny = {};
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor(private snackBar: MatSnackBar, private cookies: CookieService) {}
 
   cellRange(): string[] {
     const result: string[] = [];
@@ -83,6 +100,9 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.cookies.hasKey('language')) {
+      this.language = this.cookies.get('language');
+    }
     readJson('../assets/tile-colors.json').then((colors) => {
       Object.entries(colors).forEach((colorArray: [string, string[] | unknown]) => {
         (<string[]>colorArray[1]).forEach((cell: string) => {
@@ -100,6 +120,7 @@ export class AppComponent implements OnInit {
       }
       if (!Object.keys(this.clickedCells).includes(<never>target.id)) {
         Object.assign(this.clickedCells, { [target.id]: <MouseEvent>cell });
+        Object.assign(this.nowCells, { [target.id]: <MouseEvent>cell });
         const rgbColor = target.style.backgroundColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/)!;
         target.style.backgroundColor = `rgb(
           ${Number(rgbColor[1]) - 30},
@@ -117,41 +138,41 @@ export class AppComponent implements OnInit {
   }
 
   public clearClicked(): void {
-    Object.values(this.clickedCells)
-      .concat(Object.values(this.setCells))
-      .forEach((el) => {
-        const target = <HTMLDivElement>el.target;
-        if (Object.keys(this.cellsColors).includes(target.id)) {
-          target.style.backgroundColor = this.cellsColors[target.id];
-        } else {
-          target.style.backgroundColor = 'rgb(0,100,0)';
-        }
-        if (target.style.backgroundImage === 'url("../assets/dot.svg")') {
-          target.style.backgroundImage = '';
-        }
-        target.children[0].innerHTML = '';
-      });
-    this.setCells = {};
-    this.cellsLetters = {};
-    this.clickedCells = {};
+    Object.values(this.nowCells).forEach((el) => {
+      const target = <HTMLDivElement>el.target;
+      if (Object.keys(this.cellsColors).includes(target.id)) {
+        target.style.backgroundColor = this.cellsColors[target.id];
+      } else {
+        target.style.backgroundColor = 'rgb(0,100,0)';
+      }
+      if (target.style.backgroundImage === 'url("../assets/dot.svg")') {
+        target.style.backgroundImage = '';
+      }
+    });
+    this.mode = 'waiting';
+    Object.keys(this.nowCells).forEach((id) => {
+      delete this.clickedCells[id];
+      delete this.setCells[id];
+    });
   }
 
   @HostListener('document:keydown', ['$event'])
   keyDown(ev: KeyboardEvent): void {
-    const pushedLetter = ev.key;
-    if (
-      this.arrays.board[this.language].includes(pushedLetter) &&
-      Object.keys(this.clickedCells).length > 0 &&
-      (this.mode === 'selecting' || this.mode === 'inputting')
-    ) {
-      this.setLetter(pushedLetter);
-    } else if (
-      this.arrays.board[this.language === 'russian' ? 'english' : 'russian'].includes(
-        pushedLetter,
-      ) &&
-      pushedLetter !== ' '
-    ) {
-      this.snackBar.open(labels.layout[this.language], undefined, { duration: 1000 });
+    if (this.mode === 'selecting' || this.mode === 'inputting') {
+      const pushedLetter = ev.key;
+      if (
+        this.arrays.board[this.language].includes(pushedLetter) &&
+        Object.keys(this.clickedCells).length > 0
+      ) {
+        this.setLetter(pushedLetter);
+      } else if (
+        this.arrays.board[this.language === 'russian' ? 'english' : 'russian'].includes(
+          pushedLetter,
+        ) &&
+        pushedLetter !== ' '
+      ) {
+        this.snackBar.open(labels.layout[this.language], undefined, { duration: 1000 });
+      }
     }
   }
 
@@ -163,6 +184,9 @@ export class AppComponent implements OnInit {
       Object.assign(this.setCells, {
         [lastId]: Object.values(this.clickedCells)[Object.keys(this.setCells).length],
       });
+      Object.assign(this.nowLetters, {
+        [lastId]: pushedLetter.toUpperCase(),
+      });
       Object.assign(this.cellsLetters, {
         [lastId]: pushedLetter.toUpperCase(),
       });
@@ -172,12 +196,37 @@ export class AppComponent implements OnInit {
     }
     if (Object.keys(this.setCells).length === Object.keys(this.clickedCells).length) {
       let resultScore = 0;
-      Object.values(this.cellsLetters).forEach((letter) => {
-        resultScore += Number(scoreRaw(this.language)[letter]);
+      let multiplier = 0;
+      Object.keys(this.nowLetters).forEach((letter) => {
+        let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
+        if (Object.keys(this.cellsColors).includes(letter)) {
+          const color = this.cellsColors[letter];
+          if (color === 'rgb(255,0,0)') {
+            multiplier += 3;
+          } else if (color === 'rgb(255,192,203)') {
+            multiplier += 2;
+          } else if (color === 'rgb(135,206,235)') {
+            letterScore *= 2;
+          } else if (color === 'rgb(0,0,255)') {
+            letterScore *= 3;
+          }
+        }
+        resultScore += letterScore;
       });
-      this.snackBar.open(`${this.labels.score[this.language]}: ${resultScore}`, undefined, {
+      if (multiplier) {
+        resultScore *= multiplier;
+      }
+      this.snackBar.open(`${this.labels.wordScore[this.language]}: ${resultScore}`, undefined, {
         duration: 1000,
       });
+      this.nowLetters = {};
+      this.nowCells = {};
+      this.players[this.turn].score += resultScore;
+      if (!(this.turn === this.players.length - 1)) {
+        this.turn += 1;
+      } else {
+        this.turn = 0;
+      }
       this.mode = 'waiting';
     }
   }
@@ -191,10 +240,33 @@ export class AppComponent implements OnInit {
   }
 
   public startGame(): void {
-    this.mode = this.mode === 'settings' ? 'waiting' : 'settings';
+    if (Object.keys(this.players).length >= 2) {
+      this.mode = 'waiting';
+    } else {
+      this.snackBar.open(this.labels.notEnoughPlayers[this.language], undefined, {
+        duration: 1000,
+      });
+    }
   }
 
   public getNumber(id: string): number {
     return Object.keys(this.clickedCells).indexOf(id);
+  }
+
+  public createPlayer(name: string): void {
+    if (name.length > 0) {
+      if (!name.includes(' ')) {
+        this.players.push({ id: this.players.length, name, score: 0 });
+        this.players = [...this.players];
+      } else {
+        this.snackBar.open(this.labels.spacesInName[this.language], undefined, { duration: 1000 });
+      }
+    } else {
+      this.snackBar.open(this.labels.emptyName[this.language], undefined, { duration: 1000 });
+    }
+  }
+
+  public putLanguageCookie(lang: string) {
+    this.cookies.put('language', lang);
   }
 }

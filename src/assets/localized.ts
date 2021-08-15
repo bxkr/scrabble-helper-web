@@ -13,6 +13,26 @@ interface Arrays {
 }
 
 export const labels: Labels = {
+  spacesInName: {
+    english: 'Name cannot contain space(s)!',
+    russian: 'Имя не может содержать пробел(ы)!',
+  },
+  notEnoughPlayers: {
+    english: 'Not enough players! (only 2 and more players)',
+    russian: 'Недостаточно игроков! (только 2 и больше игроков)',
+  },
+  emptyName: {
+    english: 'Name cannot be empty!',
+    russian: 'Имя не может быть пустым!',
+  },
+  score: {
+    english: 'Score',
+    russian: 'Очки',
+  },
+  name: {
+    english: 'Name',
+    russian: 'Имя',
+  },
   playerNamePlaceholder: {
     english: 'Joe',
     russian: 'Владимир',
@@ -21,13 +41,9 @@ export const labels: Labels = {
     english: 'Add player',
     russian: 'Добавить игрока',
   },
-  score: {
+  wordScore: {
     english: 'Score for your word',
     russian: 'Очки за ваше слово',
-  },
-  players: {
-    english: 'Players',
-    russian: 'Игроки',
   },
   layout: {
     english: 'Toggle the layout!',
