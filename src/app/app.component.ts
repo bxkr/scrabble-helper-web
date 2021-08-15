@@ -250,7 +250,7 @@ export class AppComponent implements OnInit {
   }
 
   public getNumber(id: string): number {
-    return Object.keys(this.clickedCells).indexOf(id);
+    return Object.keys(this.nowCells).indexOf(id);
   }
 
   public createPlayer(name: string): void {
