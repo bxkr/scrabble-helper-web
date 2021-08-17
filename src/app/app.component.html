@@ -6,8 +6,12 @@
       </tr>
     </table>
     <div class="b-table">
-      <div *ngFor="let id of cellRange()" [id]="id" (mousemove)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null" (click)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null" [style.backgroundColor]="getBackground(id)" class="board">
-        <span class="letter-number" *ngIf="!setIncludes(id) && clickedIncludes(id)" [@slideDown] [@smooth]>{{labels.letter[language]}} {{getNumber(id)+1}}</span>
+      <div *ngFor="let id of cellRange()" [id]="id"
+           (mousemove)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null"
+           (click)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null"
+           [style.backgroundColor]="getBackground(id)" class="board">
+        <span class="letter-number" *ngIf="!setIncludes(id) && clickedIncludes(id)" [@slideDown]
+              [@smooth]>{{labels.letter[language]}} {{getNumber(id) + 1}}</span>
         <div *ngIf="setIncludes(id)" class="letter" [@smooth] [@slideUp]>
           {{ cellsLetters[id].toString().toUpperCase() }}
           <div class="letter-score">
@@ -31,15 +35,20 @@
     <div id="players-set" *ngIf="mode === 'settings'" [@smooth]>
       <mat-form-field appearance="standard">
         <mat-label>{{this.labels.addPlayer[language]}}</mat-label>
-        <input matInput [placeholder]="this.labels.playerNamePlaceholder[language]" #playerName (keydown.enter)="createPlayer(playerName.value); playerName.value = ''">
-        <button matSuffix mat-icon-button (click)="createPlayer(playerName.value); playerName.value = ''"><mat-icon>add</mat-icon></button>
+        <input matInput [placeholder]="this.labels.playerNamePlaceholder[language]" #playerName
+               (keydown.enter)="createPlayer(playerName.value); playerName.value = ''">
+        <button matSuffix mat-icon-button (click)="createPlayer(playerName.value); playerName.value = ''">
+          <mat-icon>add</mat-icon>
+        </button>
       </mat-form-field>
     </div>
     <div id="player-table-container" #table>
       <table mat-table [dataSource]="players" id="player-table">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef> {{labels.name[language]}} </th>
-          <td mat-cell *matCellDef="let element"> <span [style.color]="element['id'] === turn && mode !== 'settings' ? 'green' : 'black'">{{element['name']}}</span> </td>
+          <td mat-cell *matCellDef="let element"><span
+            [style.color]="element['id'] === turn && mode !== 'settings' ? 'green' : 'black'">{{element['name']}}</span>
+          </td>
         </ng-container>
         <ng-container matColumnDef="score">
           <th mat-header-cell *matHeaderCellDef> {{labels.score[language]}} </th>
@@ -55,8 +64,16 @@
   </div>
 </div>
 <div id="language-choice">
-    <mat-button-toggle-group name="Language" aria-label="Font Style">
-      <mat-button-toggle (change)="language = 'english'; putLanguageCookie('english'); window.location.reload()" class="lang-toggle" [checked]="language === 'english'"><img alt="English" src="../assets/english.png" class="lang-icon"></mat-button-toggle>
-      <mat-button-toggle (change)="language = 'russian'; putLanguageCookie('russian'); window.location.reload()" class="lang-toggle" [checked]="language === 'russian'"><img alt="Russian" src="../assets/russian.png" class="lang-icon"></mat-button-toggle>
+  <mat-button-toggle-group name="Language" aria-label="Font Style">
+    <mat-button-toggle (change)="language = 'english'; putLanguageCookie('english'); window.location.reload()"
+                       class="lang-toggle" [checked]="language === 'english'"><img alt="English"
+                                                                                   src="../assets/english.png"
+                                                                                   class="lang-icon">
+    </mat-button-toggle>
+    <mat-button-toggle (change)="language = 'russian'; putLanguageCookie('russian'); window.location.reload()"
+                       class="lang-toggle" [checked]="language === 'russian'"><img alt="Russian"
+                                                                                   src="../assets/russian.png"
+                                                                                   class="lang-icon">
+    </mat-button-toggle>
   </mat-button-toggle-group>
 </div>

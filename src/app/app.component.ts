@@ -1,12 +1,13 @@
 import { OnInit, Component, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { trigger, style, animate, transition } from '@angular/animations';
 import { CookieService } from 'ngx-cookie';
 import { numberRange } from '../scripts/range';
 import { readJson } from '../scripts/json';
 import { labels, arrays } from '../assets/localized';
 import generateAlphabeticalArray from '../scripts/alphabetical';
 import { scoreRaw } from '../assets/score';
+import { animation } from "./animtaion";
+import {fieldColorNames, fieldColors} from "./models/fieldColors";
 
 interface CellObj {
   [id: string]: MouseEvent;
@@ -26,26 +27,7 @@ interface Player {
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  animations: [
-    trigger('smooth', [
-      transition(':enter', [style({ opacity: 0 }), animate('.5s ease-out', style({ opacity: 1 }))]),
-      transition(':leave', [style({ opacity: 1 }), animate('.5s ease-in', style({ opacity: 0 }))]),
-    ]),
-    trigger('slideUp', [
-      transition(':enter', [
-        style({ transform: 'translateY(-300%)' }),
-        animate('.5s ease-in', style({ transform: 'translateY(0%)' })),
-      ]),
-      transition(':leave', [animate('.5s ease-in', style({ transform: 'translateY(100%)' }))]),
-    ]),
-    trigger('slideDown', [
-      transition(':enter', [
-        style({ transform: 'translateY(100%)' }),
-        animate('.5s ease-in', style({ transform: 'translateY(0%)' })),
-      ]),
-      transition(':leave', [animate('.5s ease-in', style({ transform: 'translateY(100%)' }))]),
-    ]),
-  ],
+  animations: animation,
 })
 export class AppComponent implements OnInit {
   @ViewChild('table') tableRef: ElementRef | undefined;
@@ -89,6 +71,7 @@ export class AppComponent implements OnInit {
         result.push(lt + nb.toString());
       });
     });
+    console.log(result);
     return result;
   }
 
@@ -103,11 +86,9 @@ export class AppComponent implements OnInit {
     if (this.cookies.hasKey('language')) {
       this.language = this.cookies.get('language');
     }
-    readJson('../assets/tile-colors.json').then((colors) => {
-      Object.entries(colors).forEach((colorArray: [string, string[] | unknown]) => {
-        (<string[]>colorArray[1]).forEach((cell: string) => {
-          Object.assign(this.cellsColors, { [cell]: colorArray[0] });
-        });
+    Object.entries(fieldColors).forEach((colorArray: [string, string[] | unknown]) => {
+      (<string[]>colorArray[1]).forEach((cell: string) => {
+        Object.assign(this.cellsColors, { [cell]: colorArray[0] });
       });
     });
   }
@@ -195,39 +176,10 @@ export class AppComponent implements OnInit {
       }
     }
     if (Object.keys(this.setCells).length === Object.keys(this.clickedCells).length) {
-      let resultScore = 0;
-      let multiplier = 0;
-      Object.keys(this.nowLetters).forEach((letter) => {
-        let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
-        if (Object.keys(this.cellsColors).includes(letter)) {
-          const color = this.cellsColors[letter];
-          if (color === 'rgb(255,0,0)') {
-            multiplier += 3;
-          } else if (color === 'rgb(255,192,203)') {
-            multiplier += 2;
-          } else if (color === 'rgb(135,206,235)') {
-            letterScore *= 2;
-          } else if (color === 'rgb(0,0,255)') {
-            letterScore *= 3;
-          }
-        }
-        resultScore += letterScore;
-      });
-      if (multiplier) {
-        resultScore *= multiplier;
-      }
+      let resultScore =  this.calculateScore();
       this.snackBar.open(`${this.labels.wordScore[this.language]}: ${resultScore}`, undefined, {
         duration: 1000,
       });
-      this.nowLetters = {};
-      this.nowCells = {};
-      this.players[this.turn].score += resultScore;
-      if (!(this.turn === this.players.length - 1)) {
-        this.turn += 1;
-      } else {
-        this.turn = 0;
-      }
-      this.mode = 'waiting';
     }
   }
 
@@ -268,5 +220,44 @@ export class AppComponent implements OnInit {
 
   public putLanguageCookie(lang: string) {
     this.cookies.put('language', lang);
+  }
+
+  private calculateScore(): number {
+    let resultScore = 0;
+    let multiplier = 0;
+
+
+    console.log(this.nowLetters);
+    console.log(this.cellsLetters);
+
+    Object.keys(this.nowLetters).forEach((letter) => {
+      let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
+      if (Object.keys(this.cellsColors).includes(letter)) {
+        const color = this.cellsColors[letter];
+        if (color === fieldColorNames.red) {
+          multiplier += 3;
+        } else if (color === fieldColorNames.pink) {
+          multiplier += 2;
+        } else if (color === fieldColorNames.blue) {
+          letterScore *= 2;
+        } else if (color === fieldColorNames.deepBlue) {
+          letterScore *= 3;
+        }
+      }
+      resultScore += letterScore;
+    });
+    if (multiplier) {
+      resultScore *= multiplier;
+    }
+    this.nowLetters = {};
+    this.nowCells = {};
+    this.players[this.turn].score += resultScore;
+    if (!(this.turn === this.players.length - 1)) {
+      this.turn += 1;
+    } else {
+      this.turn = 0;
+    }
+    this.mode = 'waiting';
+    return resultScore;
   }
 }
