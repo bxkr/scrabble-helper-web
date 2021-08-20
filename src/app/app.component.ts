@@ -2,12 +2,11 @@ import { OnInit, Component, HostListener, ViewChild, ElementRef } from '@angular
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CookieService } from 'ngx-cookie';
 import { numberRange } from '../scripts/range';
-import { readJson } from '../scripts/json';
-import { labels, arrays } from '../assets/localized';
+import { labels, arrays } from './models/localized';
+import { scoreRaw } from './models/score';
+import { animation } from './models/animtaion';
+import { FieldColorNames, fieldColors } from './models/fieldColors';
 import generateAlphabeticalArray from '../scripts/alphabetical';
-import { scoreRaw } from '../assets/score';
-import { animation } from "./animtaion";
-import {fieldColorNames, fieldColors} from "./models/fieldColors";
 
 interface CellObj {
   [id: string]: MouseEvent;
@@ -71,7 +70,6 @@ export class AppComponent implements OnInit {
         result.push(lt + nb.toString());
       });
     });
-    console.log(result);
     return result;
   }
 
@@ -176,7 +174,7 @@ export class AppComponent implements OnInit {
       }
     }
     if (Object.keys(this.setCells).length === Object.keys(this.clickedCells).length) {
-      let resultScore =  this.calculateScore();
+      const resultScore = this.calculateScore();
       this.snackBar.open(`${this.labels.wordScore[this.language]}: ${resultScore}`, undefined, {
         duration: 1000,
       });
@@ -225,22 +223,17 @@ export class AppComponent implements OnInit {
   private calculateScore(): number {
     let resultScore = 0;
     let multiplier = 0;
-
-
-    console.log(this.nowLetters);
-    console.log(this.cellsLetters);
-
     Object.keys(this.nowLetters).forEach((letter) => {
       let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
       if (Object.keys(this.cellsColors).includes(letter)) {
         const color = this.cellsColors[letter];
-        if (color === fieldColorNames.red) {
+        if (color === FieldColorNames.red) {
           multiplier += 3;
-        } else if (color === fieldColorNames.pink) {
+        } else if (color === FieldColorNames.pink) {
           multiplier += 2;
-        } else if (color === fieldColorNames.blue) {
+        } else if (color === FieldColorNames.blue) {
           letterScore *= 2;
-        } else if (color === fieldColorNames.deepBlue) {
+        } else if (color === FieldColorNames.deepBlue) {
           letterScore *= 3;
         }
       }

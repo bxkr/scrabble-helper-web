@@ -1,4 +1,4 @@
-import {animate, style, transition, trigger} from "@angular/animations";
+import { animate, style, transition, trigger } from '@angular/animations';
 
 export const animation = [
   trigger('smooth', [
@@ -19,4 +19,4 @@ export const animation = [
     ]),
     transition(':leave', [animate('.5s ease-in', style({ transform: 'translateY(100%)' }))]),
   ]),
-]
+];
