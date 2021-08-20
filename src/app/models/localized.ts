@@ -1,4 +1,4 @@
-import generateAlphabeticalArray from '../scripts/alphabetical';
+import generateAlphabeticalArray from '../../scripts/alphabetical';
 
 interface Labels {
   [name: string]: {
