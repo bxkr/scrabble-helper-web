@@ -15,10 +15,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
-import { AppComponent } from './app.component';
+import { AppComponent } from './component/app.component';
+import { CellDirective } from './cell/cell.directive';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, CellDirective],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

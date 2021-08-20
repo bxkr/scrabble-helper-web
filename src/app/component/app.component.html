@@ -9,7 +9,7 @@
       <div *ngFor="let id of cellRange()" [id]="id"
            (mousemove)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null"
            (click)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null"
-           [style.backgroundColor]="getBackground(id)" class="board">
+           [style.backgroundColor]="getBackground(id)" class="board" appCell>
         <span class="letter-number" *ngIf="!setIncludes(id) && clickedIncludes(id)" [@slideDown]
               [@smooth]>{{labels.letter[language]}} {{getNumber(id) + 1}}</span>
         <div *ngIf="setIncludes(id)" class="letter" [@smooth] [@slideUp]>
@@ -67,12 +67,12 @@
   <mat-button-toggle-group name="Language" aria-label="Font Style">
     <mat-button-toggle (change)="language = 'english'; putLanguageCookie('english'); window.location.reload()"
                        class="lang-toggle" [checked]="language === 'english'"><img alt="English"
-                                                                                   src="../assets/english.png"
+                                                                                   src="../../assets/english.png"
                                                                                    class="lang-icon">
     </mat-button-toggle>
     <mat-button-toggle (change)="language = 'russian'; putLanguageCookie('russian'); window.location.reload()"
                        class="lang-toggle" [checked]="language === 'russian'"><img alt="Russian"
-                                                                                   src="../assets/russian.png"
+                                                                                   src="../../assets/russian.png"
                                                                                    class="lang-icon">
     </mat-button-toggle>
   </mat-button-toggle-group>

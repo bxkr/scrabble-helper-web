@@ -1,12 +1,13 @@
-import { OnInit, Component, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { OnInit, Component, HostListener, ViewChild, ElementRef, AfterContentInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CookieService } from 'ngx-cookie';
-import { numberRange } from '../scripts/range';
-import { labels, arrays } from './models/localized';
-import { scoreRaw } from './models/score';
-import { animation } from './models/animtaion';
-import { FieldColorNames, fieldColors } from './models/fieldColors';
-import generateAlphabeticalArray from '../scripts/alphabetical';
+import { numberRange } from '../../scripts/range';
+import { labels, arrays } from '../models/localized';
+import { scoreRaw } from '../models/score';
+import { animation } from '../models/animtaion';
+import { FieldColorNames, fieldColors } from '../models/fieldColors';
+import generateAlphabeticalArray from '../../scripts/alphabetical';
+import { CellService } from '../cell/cell.service';
 
 interface CellObj {
   [id: string]: MouseEvent;
@@ -30,6 +31,8 @@ interface Player {
 })
 export class AppComponent implements OnInit {
   @ViewChild('table') tableRef: ElementRef | undefined;
+
+  cellElements: ElementRef[];
 
   window = window;
 
@@ -61,7 +64,13 @@ export class AppComponent implements OnInit {
 
   cellsColors: CellAny = {};
 
-  constructor(private snackBar: MatSnackBar, private cookies: CookieService) {}
+  constructor(
+    private snackBar: MatSnackBar,
+    private cookies: CookieService,
+    private cells: CellService,
+  ) {
+    this.cellElements = cells.getCells();
+  }
 
   cellRange(): string[] {
     const result: string[] = [];
