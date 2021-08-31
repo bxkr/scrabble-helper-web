@@ -1,16 +1,16 @@
-import { ElementRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CellService {
-  private cellRefs: ElementRef[] = [];
+  private cellRefs: HTMLCollection[] = [];
 
-  public getCells(): ElementRef[] {
+  public getCells(): HTMLCollection[] {
     return this.cellRefs;
   }
 
-  public pushCell(el: ElementRef): void {
+  public pushCell(el: HTMLCollection): void {
     this.cellRefs.push(el);
   }
 }

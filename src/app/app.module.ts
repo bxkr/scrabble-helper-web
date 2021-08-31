@@ -16,10 +16,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
 import { AppComponent } from './component/app.component';
+import { CellRowDirective } from './cell/cell-row.directive';
 import { CellDirective } from './cell/cell.directive';
 
 @NgModule({
-  declarations: [AppComponent, CellDirective],
+  declarations: [AppComponent, CellRowDirective, CellDirective],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

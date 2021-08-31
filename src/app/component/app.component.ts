@@ -1,4 +1,4 @@
-import { OnInit, Component, HostListener, ViewChild, ElementRef, AfterContentInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CookieService } from 'ngx-cookie';
 import { numberRange } from '../../scripts/range';
@@ -6,8 +6,9 @@ import { labels, arrays } from '../models/localized';
 import { scoreRaw } from '../models/score';
 import { animation } from '../models/animtaion';
 import { FieldColorNames, fieldColors } from '../models/fieldColors';
-import generateAlphabeticalArray from '../../scripts/alphabetical';
 import { CellService } from '../cell/cell.service';
+import generateAlphabeticalArray from '../../scripts/alphabetical';
+import sleep from '../../scripts/sleep';
 
 interface CellObj {
   [id: string]: MouseEvent;
@@ -29,10 +30,12 @@ interface Player {
   styleUrls: ['./app.component.css'],
   animations: animation,
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements AfterViewInit {
   @ViewChild('table') tableRef: ElementRef | undefined;
 
-  cellElements: ElementRef[];
+  cellElements: Element[][] = [];
+
+  cellIterator: any[] = [...Array(15).keys()];
 
   window = window;
 
@@ -68,9 +71,7 @@ export class AppComponent implements OnInit {
     private snackBar: MatSnackBar,
     private cookies: CookieService,
     private cells: CellService,
-  ) {
-    this.cellElements = cells.getCells();
-  }
+  ) {}
 
   cellRange(): string[] {
     const result: string[] = [];
@@ -89,13 +90,45 @@ export class AppComponent implements OnInit {
     return 'rgb(0,100,0)';
   }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
+    this.cells.getCells().forEach((raw) => {
+      this.cellElements.push(Array.from(raw));
+    });
+    this.cookieLanguage();
+    this.prepareColorArray();
+    this.setColors();
+  }
+
+  private cookieLanguage(): void {
     if (this.cookies.hasKey('language')) {
       this.language = this.cookies.get('language');
     }
-    Object.entries(fieldColors).forEach((colorArray: [string, string[] | unknown]) => {
-      (<string[]>colorArray[1]).forEach((cell: string) => {
-        Object.assign(this.cellsColors, { [cell]: colorArray[0] });
+  }
+
+  private prepareColorArray(): void {
+    Object.entries(fieldColors).forEach((colorArray: [string, number[][] | unknown]) => {
+      (<number[][]>colorArray[1]).forEach((cell: number[]) => {
+        Object.assign(this.cellsColors, { [cell.join(' ')]: colorArray[0] });
+      });
+    });
+  }
+
+  private setColors(): void {
+    this.cellElements.forEach((raw_row, index) => {
+      const row = Array.from(raw_row);
+      row.forEach((cell, local) => {
+        sleep((index + local) * 80).then(() => {
+          const cellEl = <HTMLDivElement>cell;
+          const coordinates = [this.cellElements.indexOf(raw_row), row.indexOf(cell)].join(' ');
+          if (Object.keys(this.cellsColors).includes(coordinates)) {
+            cellEl.style.backgroundColor = this.cellsColors[coordinates];
+            if (coordinates === '7 7') {
+              cellEl.id = 'star';
+            }
+          } else {
+            cellEl.style.backgroundColor = 'rgb(0, 100, 0)';
+          }
+        });
       });
     });
   }
@@ -145,7 +178,7 @@ export class AppComponent implements OnInit {
   }
 
   @HostListener('document:keydown', ['$event'])
-  keyDown(ev: KeyboardEvent): void {
+  private keyDown(ev: KeyboardEvent): void {
     if (this.mode === 'selecting' || this.mode === 'inputting') {
       const pushedLetter = ev.key;
       if (
@@ -164,7 +197,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  setLetter(pushedLetter: string): void {
+  private setLetter(pushedLetter: string): void {
     if (Object.keys(this.setCells).length < Object.keys(this.clickedCells).length) {
       const lastId = (<HTMLDivElement>(
         Object.values(this.clickedCells)[Object.keys(this.setCells).length].target
@@ -261,5 +294,9 @@ export class AppComponent implements OnInit {
     }
     this.mode = 'waiting';
     return resultScore;
+  }
+
+  private getCoordinates(target: HTMLElement): string {
+    return `${this.cellElements.indexOf(Array.from(target.parentElement!.children))}`;
   }
 }
