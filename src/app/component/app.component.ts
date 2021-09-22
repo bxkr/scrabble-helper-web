@@ -4,10 +4,9 @@ import { CookieService } from 'ngx-cookie';
 import { numberRange } from '../../scripts/range';
 import { labels, arrays } from '../models/localized';
 import { scoreRaw } from '../models/score';
-import { animation } from '../models/animtaion';
+import { animation } from '../models/animation';
 import { FieldColorNames, fieldColors } from '../models/fieldColors';
 import { CellService } from '../cell/cell.service';
-import generateAlphabeticalArray from '../../scripts/alphabetical';
 import sleep from '../../scripts/sleep';
 
 interface CellObj {
@@ -73,23 +72,6 @@ export class AppComponent implements AfterViewInit {
     private cells: CellService,
   ) {}
 
-  cellRange(): string[] {
-    const result: string[] = [];
-    this.rowRange.forEach((nb) => {
-      generateAlphabeticalArray('А', 'О').forEach((lt) => {
-        result.push(lt + nb.toString());
-      });
-    });
-    return result;
-  }
-
-  getBackground(id: string): string {
-    if (Object.keys(this.cellsColors).includes(id)) {
-      return this.cellsColors[id];
-    }
-    return 'rgb(0,100,0)';
-  }
-
   ngAfterViewInit(): void {
     this.cells.getCells().forEach((raw) => {
       this.cellElements.push(Array.from(raw));
@@ -133,15 +115,28 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
+  private getCoordinates(target: HTMLElement): string {
+    let arrIndex = -1;
+    let cellIndex = -1;
+    this.cellElements.forEach((arr, index) => {
+      if (arr.indexOf(target) !== -1) {
+        arrIndex = index;
+        cellIndex = arr.indexOf(target);
+      }
+    });
+    return `${arrIndex} ${cellIndex}`;
+  }
+
   public cellOk(cell: MouseEvent | PointerEvent): void {
     if (cell.buttons || cell.type === 'click') {
       let target = <HTMLElement>cell.target;
+      const coordinates = this.getCoordinates(<HTMLElement>target);
       if (target.tagName === 'SPAN') {
         target = target.parentElement!;
       }
-      if (!Object.keys(this.clickedCells).includes(<never>target.id)) {
-        Object.assign(this.clickedCells, { [target.id]: <MouseEvent>cell });
-        Object.assign(this.nowCells, { [target.id]: <MouseEvent>cell });
+      if (!Object.keys(this.clickedCells).includes(<never>coordinates)) {
+        Object.assign(this.clickedCells, { [coordinates]: <MouseEvent>cell });
+        Object.assign(this.nowCells, { [coordinates]: <MouseEvent>cell });
         const rgbColor = target.style.backgroundColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/)!;
         target.style.backgroundColor = `rgb(
           ${Number(rgbColor[1]) - 30},
@@ -199,17 +194,15 @@ export class AppComponent implements AfterViewInit {
 
   private setLetter(pushedLetter: string): void {
     if (Object.keys(this.setCells).length < Object.keys(this.clickedCells).length) {
-      const lastId = (<HTMLDivElement>(
-        Object.values(this.clickedCells)[Object.keys(this.setCells).length].target
-      )).id;
+      const lastCoordinates = Object.keys(this.clickedCells)[Object.keys(this.setCells).length];
       Object.assign(this.setCells, {
-        [lastId]: Object.values(this.clickedCells)[Object.keys(this.setCells).length],
+        [lastCoordinates]: Object.values(this.clickedCells)[Object.keys(this.setCells).length],
       });
       Object.assign(this.nowLetters, {
-        [lastId]: pushedLetter.toUpperCase(),
+        [lastCoordinates]: pushedLetter.toUpperCase(),
       });
       Object.assign(this.cellsLetters, {
-        [lastId]: pushedLetter.toUpperCase(),
+        [lastCoordinates]: pushedLetter.toUpperCase(),
       });
       if (this.mode === 'selecting') {
         this.mode = 'inputting';
@@ -294,9 +287,5 @@ export class AppComponent implements AfterViewInit {
     }
     this.mode = 'waiting';
     return resultScore;
-  }
-
-  private getCoordinates(target: HTMLElement): string {
-    return `${this.cellElements.indexOf(Array.from(target.parentElement!.children))}`;
   }
 }
