@@ -32,6 +32,8 @@ interface Player {
 export class AppComponent implements AfterViewInit {
   @ViewChild('table') tableRef: ElementRef | undefined;
 
+  @ViewChild('playerName') playerName: ElementRef | undefined;
+
   cellElements: Element[][] = [];
 
   cellIterator: any[] = [...Array(15).keys()];
@@ -73,6 +75,7 @@ export class AppComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit(): void {
+    this.playerName?.nativeElement.focus();
     this.cells.getCells().forEach((raw) => {
       this.cellElements.push(Array.from(raw));
     });
@@ -156,8 +159,9 @@ export class AppComponent implements AfterViewInit {
   public clearClicked(): void {
     Object.values(this.nowCells).forEach((el) => {
       const target = <HTMLDivElement>el.target;
-      if (Object.keys(this.cellsColors).includes(target.id)) {
-        target.style.backgroundColor = this.cellsColors[target.id];
+      const coordinates = this.getCoordinates(target);
+      if (Object.keys(this.cellsColors).includes(coordinates)) {
+        target.style.backgroundColor = this.cellsColors[coordinates];
       } else {
         target.style.backgroundColor = 'rgb(0,100,0)';
       }
@@ -262,14 +266,21 @@ export class AppComponent implements AfterViewInit {
       let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
       if (Object.keys(this.cellsColors).includes(letter)) {
         const color = this.cellsColors[letter];
-        if (color === FieldColorNames.red) {
-          multiplier += 3;
-        } else if (color === FieldColorNames.pink) {
-          multiplier += 2;
-        } else if (color === FieldColorNames.blue) {
-          letterScore *= 2;
-        } else if (color === FieldColorNames.deepBlue) {
-          letterScore *= 3;
+        switch (color) {
+          case FieldColorNames.red:
+            multiplier += 3;
+            break;
+          case FieldColorNames.pink:
+            multiplier += 2;
+            break;
+          case FieldColorNames.blue:
+            letterScore *= 2;
+            break;
+          case FieldColorNames.deepBlue:
+            letterScore *= 3;
+            break;
+          default:
+            break;
         }
       }
       resultScore += letterScore;

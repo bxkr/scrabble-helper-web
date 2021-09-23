@@ -60,8 +60,8 @@
         <tr mat-row *matRowDef="let row; columns: ['name', 'score'];"></tr>
       </table>
     </div>
-    <div id="start-game" *ngIf="mode === 'settings'" [@smooth] (click)="startGame()">
-      <button mat-stroked-button>{{labels.done[language]}}</button>
+    <div id="start-game" (click)="startGame()">
+      <button mat-stroked-button>{{mode === 'settings' ? labels.done[language] : labels.finishGame[language]}}</button>
     </div>
   </div>
 </div>

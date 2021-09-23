@@ -65,6 +65,10 @@ export const labels: Labels = {
     english: 'Done!',
     russian: 'Готово!',
   },
+  finishGame: {
+    english: 'Finish!',
+    russian: 'Закончить!',
+  },
 };
 
 export const arrays: Arrays = {
