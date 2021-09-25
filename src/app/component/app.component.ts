@@ -258,8 +258,9 @@ export class AppComponent implements AfterViewInit {
   private calculateScore(): number {
     let resultScore = 0;
     let multiplier = 0;
-    Object.keys(this.nowLetters).forEach((letter) => {
+    Object.keys(this.nowLetters).forEach((letter, index) => {
       let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
+      const currentCoordinates: number[] = Object.keys(this.nowCells)[index].split(' ').map(Number);
       if (Object.keys(this.cellsColors).includes(letter)) {
         const color = this.cellsColors[letter];
         switch (color) {
@@ -280,6 +281,43 @@ export class AppComponent implements AfterViewInit {
         }
       }
       resultScore += letterScore;
+      const newCoordinates = (arr: number[]) => {
+        return [currentCoordinates[0] + arr[0], currentCoordinates[1] + arr[1]];
+      };
+      const searchExpression = (arr: number[]) => {
+        return Object.keys(this.setCells).includes(newCoordinates(arr).join(' '));
+      };
+      const directions = [
+        [0, -1],
+        [0, 1],
+        [-1, 0],
+        [1, 0],
+      ];
+      directions.forEach((direction: number[]) => {
+        if (searchExpression(direction)) {
+          let tempCoord = newCoordinates(direction).join(' ');
+          while (this.cellsLetters[tempCoord]) {
+            if (Object.keys(this.nowCells).includes(tempCoord)) {
+              break;
+            }
+            resultScore += Number(scoreRaw(this.language)[this.cellsLetters[tempCoord]]);
+            const splitCoord = tempCoord.split(' ').map(Number);
+            if (direction[0] !== 0) {
+              tempCoord = [
+                splitCoord[0] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
+                splitCoord[1],
+              ].join(' ');
+            }
+            if (direction[1] !== 0) {
+              tempCoord = [
+                splitCoord[0],
+                splitCoord[1] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
+              ].join(' ');
+            }
+            console.log(tempCoord);
+          }
+        }
+      });
     });
     if (multiplier) {
       resultScore *= multiplier;
