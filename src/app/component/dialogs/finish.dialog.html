@@ -1,0 +1,24 @@
+<div id="general">
+  <div id="title">
+    <h2>{{dialog_data.labels.finished[dialog_data.language]}}</h2>
+    <sup>{{dialog_data.labels.results[dialog_data.language]}}:</sup>
+  </div>
+  <mat-grid-list [cols]="positions.length" id="positions" rowHeight="3:1">
+    <mat-grid-tile *ngFor="let name of positions; index as i"><span class="position">{{i+1}}. {{name}}</span></mat-grid-tile>
+  </mat-grid-list>
+  <div id="player-table-container">
+    <table mat-table [dataSource]="dialog_data.players" id="player-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> {{dialog_data.labels.name[dialog_data.language]}} </th>
+        <td mat-cell *matCellDef="let element"><span>{{element['name']}}</span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="score">
+        <th mat-header-cell *matHeaderCellDef> {{dialog_data.labels.score[dialog_data.language]}} </th>
+        <td mat-cell *matCellDef="let element"> {{element['score']}} </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="['name', 'score']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['name', 'score'];"></tr>
+    </table>
+  </div>
+</div>

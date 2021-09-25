@@ -15,12 +15,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
+import { MatDialogModule } from '@angular/material/dialog';
 import { AppComponent } from './component/app.component';
 import { CellRowDirective } from './cell/cell-row.directive';
 import { CellDirective } from './cell/cell.directive';
+import { FinishDialogComponent } from './component/dialogs/finish.dialog';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 @NgModule({
-  declarations: [AppComponent, CellRowDirective, CellDirective],
+  declarations: [AppComponent, CellRowDirective, CellDirective, FinishDialogComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -36,7 +39,9 @@ import { CellDirective } from './cell/cell.directive';
     MatInputModule,
     MatListModule,
     MatTableModule,
+    MatDialogModule,
     CookieModule.forRoot(),
+    MatGridListModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

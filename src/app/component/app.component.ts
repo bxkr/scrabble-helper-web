@@ -1,12 +1,16 @@
 import { AfterViewInit, Component, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CookieService } from 'ngx-cookie';
+import { MatDialog } from '@angular/material/dialog';
 import { numberRange } from '../../scripts/range';
 import { labels, arrays } from '../models/localized';
 import { scoreRaw } from '../models/score';
 import { animation } from '../models/animation';
 import { FieldColorNames, fieldColors } from '../models/fieldColors';
 import { CellService } from '../cell/cell.service';
+import { FinishDialogComponent } from './dialogs/finish.dialog';
+import { Player } from '../models/player';
+import { DialogData } from '../models/dialogData';
 import sleep from '../../scripts/sleep';
 
 interface CellObj {
@@ -17,12 +21,6 @@ interface CellAny {
   [id: string]: string;
 }
 
-interface Player {
-  id: number;
-  name: string;
-  score: number;
-}
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -31,8 +29,6 @@ interface Player {
 })
 export class AppComponent implements AfterViewInit {
   @ViewChild('table') tableRef: ElementRef | undefined;
-
-  @ViewChild('playerName') playerName: ElementRef | undefined;
 
   cellElements: Element[][] = [];
 
@@ -72,10 +68,10 @@ export class AppComponent implements AfterViewInit {
     private snackBar: MatSnackBar,
     private cookies: CookieService,
     private cells: CellService,
+    private dialog: MatDialog,
   ) {}
 
   ngAfterViewInit(): void {
-    this.playerName?.nativeElement.focus();
     this.cells.getCells().forEach((raw) => {
       this.cellElements.push(Array.from(raw));
     });
@@ -298,5 +294,17 @@ export class AppComponent implements AfterViewInit {
     }
     this.mode = 'waiting';
     return resultScore;
+  }
+
+  public finishGame(): void {
+    this.mode = 'settings';
+    this.dialog.open(FinishDialogComponent, {
+      data: <DialogData>{
+        labels: this.labels,
+        language: this.language,
+        players: this.players,
+      },
+    });
+    this.players = [];
   }
 }

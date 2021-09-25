@@ -60,7 +60,7 @@
         <tr mat-row *matRowDef="let row; columns: ['name', 'score'];"></tr>
       </table>
     </div>
-    <div id="start-game" (click)="startGame()">
+    <div id="start-game" (click)="mode === 'settings' ? startGame() : finishGame()">
       <button mat-stroked-button>{{mode === 'settings' ? labels.done[language] : labels.finishGame[language]}}</button>
     </div>
   </div>

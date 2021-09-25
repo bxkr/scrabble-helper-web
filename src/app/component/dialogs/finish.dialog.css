@@ -1,0 +1,23 @@
+#general {
+  min-width: 20vw;
+}
+
+#title {
+  display: flex;
+  flex-direction: column;
+}
+
+#title > h2 {
+  margin: 0;
+  line-height: 1em;
+}
+
+#player-table-container {
+  align-items: flex-start;
+  overflow-y: auto;
+  height: 28vh;
+}
+
+#player-table {
+  width: 100%;
+}

@@ -1,12 +1,12 @@
 import generateAlphabeticalArray from '../../scripts/alphabetical';
 
-interface Labels {
+export interface Labels {
   [name: string]: {
     [language: string]: string;
   };
 }
 
-interface Arrays {
+export interface Arrays {
   [name: string]: {
     [language: string]: string[];
   };
@@ -68,6 +68,14 @@ export const labels: Labels = {
   finishGame: {
     english: 'Finish!',
     russian: 'Закончить!',
+  },
+  finished: {
+    english: 'Game finished!',
+    russian: 'Игра окончена!',
+  },
+  results: {
+    english: 'Results',
+    russian: 'Результаты',
   },
 };
 
