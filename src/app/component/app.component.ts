@@ -129,9 +129,10 @@ export class AppComponent implements AfterViewInit {
   public cellOk(cell: MouseEvent | PointerEvent): void {
     if (cell.buttons || cell.type === 'click') {
       let target = <HTMLElement>cell.target;
-      const coordinates = this.getCoordinates(<HTMLElement>target);
+      let coordinates = this.getCoordinates(<HTMLElement>target);
       if (target.tagName === 'SPAN') {
         target = target.parentElement!;
+        coordinates = this.getCoordinates(<HTMLElement>target);
       }
       if (!Object.keys(this.clickedCells).includes(<never>coordinates)) {
         Object.assign(this.clickedCells, { [coordinates]: <MouseEvent>cell });
@@ -258,6 +259,7 @@ export class AppComponent implements AfterViewInit {
   private calculateScore(): number {
     let resultScore = 0;
     let multiplier = 0;
+    const tempBlocked: string[] = [];
     Object.keys(this.nowLetters).forEach((letter, index) => {
       let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
       const currentCoordinates: number[] = Object.keys(this.nowCells)[index].split(' ').map(Number);
@@ -297,10 +299,11 @@ export class AppComponent implements AfterViewInit {
         if (searchExpression(direction)) {
           let tempCoord = newCoordinates(direction).join(' ');
           while (this.cellsLetters[tempCoord]) {
-            if (Object.keys(this.nowCells).includes(tempCoord)) {
+            if (Object.keys(this.nowCells).includes(tempCoord) || tempBlocked.includes(tempCoord)) {
               break;
             }
             resultScore += Number(scoreRaw(this.language)[this.cellsLetters[tempCoord]]);
+            tempBlocked.push(tempCoord);
             const splitCoord = tempCoord.split(' ').map(Number);
             if (direction[0] !== 0) {
               tempCoord = [
@@ -314,7 +317,6 @@ export class AppComponent implements AfterViewInit {
                 splitCoord[1] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
               ].join(' ');
             }
-            console.log(tempCoord);
           }
         }
       });
