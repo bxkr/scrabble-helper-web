@@ -164,3 +164,11 @@
 .lang-icon {
   width: 2vh;
 }
+
+.coordinates {
+  color: white;
+  position: absolute;
+  margin-right: 2.5vh;
+  margin-top: 2.5vh;
+  font-size: .75em;
+}

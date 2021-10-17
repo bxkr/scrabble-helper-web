@@ -10,6 +10,7 @@
         <div appCell *ngFor="let j of cellIterator" class="board"
              (mousemove)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null"
              (click)="mode === 'waiting' || mode === 'selecting' ? cellOk($event) : null">
+          <span class="coordinates" *ngIf="development">{{i}} {{j}}</span>
           <span class="letter-number" *ngIf="!setIncludes([i, j].join(' ')) && clickedIncludes([i, j].join(' '))"
                 [@slideDown]
                 [@smooth]>{{labels.letter[language]}} {{getNumber([i, j].join(' ')) + 1}}</span>

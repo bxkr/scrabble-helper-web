@@ -1,9 +1,16 @@
-import { AfterViewInit, Component, HostListener, ViewChild, ElementRef } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CookieService } from 'ngx-cookie';
 import { MatDialog } from '@angular/material/dialog';
 import { numberRange } from '../../scripts/range';
-import { labels, arrays } from '../models/localized';
+import { arrays, labels } from '../models/localized';
 import { scoreRaw } from '../models/score';
 import { animation } from '../models/animation';
 import { FieldColorNames, fieldColors } from '../models/fieldColors';
@@ -11,6 +18,7 @@ import { CellService } from '../cell/cell.service';
 import { FinishDialogComponent } from './dialogs/finish.dialog';
 import { Player } from '../models/player';
 import { DialogData } from '../models/dialogData';
+import { environment } from '../../environments/environment';
 import sleep from '../../scripts/sleep';
 
 interface CellObj {
@@ -27,7 +35,9 @@ interface CellAny {
   styleUrls: ['./app.component.css'],
   animations: animation,
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
+  development = !environment.production;
+
   @ViewChild('table') tableRef: ElementRef | undefined;
 
   cellElements: Element[][] = [];
@@ -75,12 +85,11 @@ export class AppComponent implements AfterViewInit {
     this.cells.getCells().forEach((raw) => {
       this.cellElements.push(Array.from(raw));
     });
-    this.cookieLanguage();
     this.prepareColorArray();
     this.setColors();
   }
 
-  private cookieLanguage(): void {
+  ngOnInit(): void {
     if (this.cookies.hasKey('language')) {
       this.language = this.cookies.get('language');
     }
@@ -129,12 +138,21 @@ export class AppComponent implements AfterViewInit {
   public cellOk(cell: MouseEvent | PointerEvent): void {
     if (cell.buttons || cell.type === 'click') {
       let target = <HTMLElement>cell.target;
-      let coordinates = this.getCoordinates(<HTMLElement>target);
-      if (target.tagName === 'SPAN') {
+      const className = target.className.split(' ');
+      if (
+        className.includes('letter-number') ||
+        className.includes('letter') ||
+        className.includes('coordinates')
+      ) {
         target = target.parentElement!;
-        coordinates = this.getCoordinates(<HTMLElement>target);
+      } else if (className.includes('letter-score')) {
+        target = target.parentElement!.parentElement!;
       }
-      if (!Object.keys(this.clickedCells).includes(<never>coordinates)) {
+      const coordinates = this.getCoordinates(<HTMLElement>target);
+      if (
+        !Object.keys(this.clickedCells).includes(<never>coordinates) &&
+        !Object.keys(this.setCells).includes(<never>coordinates)
+      ) {
         Object.assign(this.clickedCells, { [coordinates]: <MouseEvent>cell });
         Object.assign(this.nowCells, { [coordinates]: <MouseEvent>cell });
         const rgbColor = target.style.backgroundColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/)!;
@@ -256,71 +274,196 @@ export class AppComponent implements AfterViewInit {
     this.cookies.put('language', lang);
   }
 
+  private getLetterScore(coordinatesString: string): number[] {
+    let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[coordinatesString]]);
+    let multiplier = 0;
+    const color = this.cellsColors[coordinatesString];
+    switch (color) {
+      case FieldColorNames.red:
+        multiplier = 3;
+        break;
+      case FieldColorNames.pink:
+        multiplier = 2;
+        break;
+      case FieldColorNames.blue:
+        letterScore *= 2;
+        break;
+      case FieldColorNames.deepBlue:
+        letterScore *= 3;
+        break;
+      default:
+        break;
+    }
+    return [letterScore, multiplier];
+  }
+
   private calculateScore(): number {
     let resultScore = 0;
     let multiplier = 0;
-    const tempBlocked: string[] = [];
-    Object.keys(this.nowLetters).forEach((letter, index) => {
-      let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
-      const currentCoordinates: number[] = Object.keys(this.nowCells)[index].split(' ').map(Number);
-      if (Object.keys(this.cellsColors).includes(letter)) {
-        const color = this.cellsColors[letter];
-        switch (color) {
-          case FieldColorNames.red:
-            multiplier += 3;
-            break;
-          case FieldColorNames.pink:
-            multiplier += 2;
-            break;
-          case FieldColorNames.blue:
-            letterScore *= 2;
-            break;
-          case FieldColorNames.deepBlue:
-            letterScore *= 3;
-            break;
-          default:
-            break;
+    /* const oldMethod = () => {
+      let wordDirection: string | undefined;
+      const tempBlocked: string[] = [];
+      const coordGen = (o: Object, index: number) => {
+        return Object.keys(o)[index].split(' ').map(Number);
+      };
+      const zeroCoord = coordGen(this.nowCells, 0);
+      let oneCoord: number[] | undefined;
+      if (Object.keys(this.nowCells).length > 1) {
+        oneCoord = coordGen(this.nowCells, 1);
+      }
+      if (oneCoord) {
+        if (zeroCoord[0] === oneCoord[0]) {
+          wordDirection = 'v';
+        } else if (zeroCoord[1] === oneCoord[1]) {
+          wordDirection = 'h';
         }
       }
-      resultScore += letterScore;
-      const newCoordinates = (arr: number[]) => {
-        return [currentCoordinates[0] + arr[0], currentCoordinates[1] + arr[1]];
-      };
-      const searchExpression = (arr: number[]) => {
-        return Object.keys(this.setCells).includes(newCoordinates(arr).join(' '));
-      };
-      const directions = [
-        [0, -1],
-        [0, 1],
-        [-1, 0],
-        [1, 0],
-      ];
-      directions.forEach((direction: number[]) => {
-        if (searchExpression(direction)) {
-          let tempCoord = newCoordinates(direction).join(' ');
-          while (this.cellsLetters[tempCoord]) {
-            if (Object.keys(this.nowCells).includes(tempCoord) || tempBlocked.includes(tempCoord)) {
+      Object.keys(this.nowLetters).forEach((letter, index) => {
+        let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
+        const currentCoordinates: number[] = Object.keys(this.nowCells)
+          [index].split(' ')
+          .map(Number);
+        if (Object.keys(this.cellsColors).includes(letter)) {
+          const color = this.cellsColors[letter];
+          switch (color) {
+            case FieldColorNames.red:
+              multiplier += 3;
               break;
-            }
-            resultScore += Number(scoreRaw(this.language)[this.cellsLetters[tempCoord]]);
-            tempBlocked.push(tempCoord);
-            const splitCoord = tempCoord.split(' ').map(Number);
-            if (direction[0] !== 0) {
-              tempCoord = [
-                splitCoord[0] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
-                splitCoord[1],
-              ].join(' ');
-            }
-            if (direction[1] !== 0) {
-              tempCoord = [
-                splitCoord[0],
-                splitCoord[1] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
-              ].join(' ');
-            }
+            case FieldColorNames.pink:
+              multiplier += 2;
+              break;
+            case FieldColorNames.blue:
+              letterScore *= 2;
+              break;
+            case FieldColorNames.deepBlue:
+              letterScore *= 3;
+              break;
+            default:
+              break;
           }
         }
+        const newCoordinates = (arr: number[]) => {
+          return [currentCoordinates[0] + arr[0], currentCoordinates[1] + arr[1]];
+        };
+        const searchExpression = (arr: number[]) => {
+          return Object.keys(this.setCells).includes(newCoordinates(arr).join(' '));
+        };
+        const directions = [
+          [0, -1],
+          [0, 1],
+          [-1, 0],
+          [1, 0],
+        ];
+        let multiDirection = 0;
+        directions.forEach((direction: number[]) => {
+          if (searchExpression(direction)) {
+            let tempCoord = newCoordinates(direction).join(' ');
+            if (wordDirection) {
+              if (
+                newCoordinates(direction)[0] === currentCoordinates[0] &&
+                !(wordDirection === 'v')
+              ) {
+                multiDirection += 1;
+              } else if (
+                newCoordinates(direction)[1] === currentCoordinates[1] &&
+                !(wordDirection === 'h')
+              ) {
+                multiDirection += 1;
+              }
+            }
+            while (this.cellsLetters[tempCoord]) {
+              if (
+                Object.keys(this.nowCells).includes(tempCoord) ||
+                tempBlocked.includes(tempCoord)
+              ) {
+                break;
+              }
+              resultScore += Number(scoreRaw(this.language)[this.cellsLetters[tempCoord]]);
+              tempBlocked.push(tempCoord);
+              const splitCoord = tempCoord.split(' ').map(Number);
+              if (direction[0] !== 0) {
+                tempCoord = [
+                  splitCoord[0] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
+                  splitCoord[1],
+                ].join(' ');
+              }
+              if (direction[1] !== 0) {
+                tempCoord = [
+                  splitCoord[0],
+                  splitCoord[1] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
+                ].join(' ');
+              }
+            }
+          }
+        });
+        resultScore += letterScore * (multiDirection + 1);
       });
-    });
+    }; */
+    const newMethod = () => {
+      const toCoordinate = (str: string): number[] => {
+        return str.split(' ').map(Number);
+      };
+      const toStringCoordinate = (list: number[]): string => {
+        return list.join(' ');
+      };
+      const center = Object.keys(this.nowCells)[0];
+      const hozFirstFun = (tempCoordR: string): string => {
+        let tempCoord = tempCoordR;
+        let lastFound = String();
+        while (this.setCells[tempCoord]) {
+          lastFound = tempCoord;
+          const temp = toCoordinate(tempCoord);
+          tempCoord = toStringCoordinate([temp[0] - 1, temp[1]]);
+        }
+        return lastFound;
+      };
+      const vertFirstFun = (tempCoordR: string): string => {
+        let tempCoord = tempCoordR;
+        let lastFound = String();
+        while (this.setCells[tempCoord]) {
+          lastFound = tempCoord;
+          const temp = toCoordinate(tempCoord);
+          tempCoord = toStringCoordinate([temp[0], temp[1] - 1]);
+        }
+        return lastFound;
+      };
+      const hozFirst = hozFirstFun(center);
+      const vertFirst = vertFirstFun(center);
+      let blocked: string[] = [];
+      const hozIterate = (tempCoordR: string) => {
+        let tempCoord = tempCoordR;
+        while (this.setCells[tempCoord]) {
+          blocked = [...tempCoord];
+          resultScore += this.getLetterScore(tempCoord)[0];
+          if (Object.keys(this.nowCells).includes(tempCoord)) {
+            multiplier += this.getLetterScore(tempCoord)[1];
+          }
+          const temp = toCoordinate(tempCoord);
+          tempCoord = toStringCoordinate([temp[0] + 1, temp[1]]);
+        }
+      };
+      const vertIterate = (tempCoordR: string) => {
+        let tempCoord = tempCoordR;
+        if (tempCoordR === center) {
+          const temp = toCoordinate(tempCoord);
+          tempCoord = toStringCoordinate([temp[0], temp[1] + 1]);
+        }
+        while (this.setCells[tempCoord]) {
+          if (!blocked.includes(tempCoord)) {
+            blocked = [...tempCoord];
+            resultScore += this.getLetterScore(tempCoord)[0];
+            if (Object.keys(this.nowCells).includes(tempCoord)) {
+              multiplier += this.getLetterScore(tempCoord)[1];
+            }
+          }
+          const temp = toCoordinate(tempCoord);
+          tempCoord = toStringCoordinate([temp[0], temp[1] + 1]);
+        }
+      };
+      hozIterate(hozFirst);
+      vertIterate(vertFirst);
+    };
+    newMethod();
     if (multiplier) {
       resultScore *= multiplier;
     }
@@ -346,5 +489,9 @@ export class AppComponent implements AfterViewInit {
       },
     });
     this.players = [];
+    this.clearClicked();
+    this.setCells = {};
+    this.clickedCells = {};
+    this.cellsLetters = {};
   }
 }
