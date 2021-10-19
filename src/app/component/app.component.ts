@@ -275,130 +275,32 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   private getLetterScore(coordinatesString: string): number[] {
-    let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[coordinatesString]]);
-    let multiplier = 0;
+    const letterScore = Number(scoreRaw(this.language)[this.cellsLetters[coordinatesString]]);
+    let letterMultiplier = 1;
+    let wordMultiplier = 0;
     const color = this.cellsColors[coordinatesString];
     switch (color) {
       case FieldColorNames.red:
-        multiplier = 3;
+        wordMultiplier = 3;
         break;
       case FieldColorNames.pink:
-        multiplier = 2;
+        wordMultiplier = 2;
         break;
       case FieldColorNames.blue:
-        letterScore *= 2;
+        letterMultiplier = 2;
         break;
       case FieldColorNames.deepBlue:
-        letterScore *= 3;
+        letterMultiplier = 3;
         break;
       default:
         break;
     }
-    return [letterScore, multiplier];
+    return [letterScore, letterMultiplier, wordMultiplier];
   }
 
   private calculateScore(): number {
     let resultScore = 0;
     let multiplier = 0;
-    /* const oldMethod = () => {
-      let wordDirection: string | undefined;
-      const tempBlocked: string[] = [];
-      const coordGen = (o: Object, index: number) => {
-        return Object.keys(o)[index].split(' ').map(Number);
-      };
-      const zeroCoord = coordGen(this.nowCells, 0);
-      let oneCoord: number[] | undefined;
-      if (Object.keys(this.nowCells).length > 1) {
-        oneCoord = coordGen(this.nowCells, 1);
-      }
-      if (oneCoord) {
-        if (zeroCoord[0] === oneCoord[0]) {
-          wordDirection = 'v';
-        } else if (zeroCoord[1] === oneCoord[1]) {
-          wordDirection = 'h';
-        }
-      }
-      Object.keys(this.nowLetters).forEach((letter, index) => {
-        let letterScore = Number(scoreRaw(this.language)[this.cellsLetters[letter]]);
-        const currentCoordinates: number[] = Object.keys(this.nowCells)
-          [index].split(' ')
-          .map(Number);
-        if (Object.keys(this.cellsColors).includes(letter)) {
-          const color = this.cellsColors[letter];
-          switch (color) {
-            case FieldColorNames.red:
-              multiplier += 3;
-              break;
-            case FieldColorNames.pink:
-              multiplier += 2;
-              break;
-            case FieldColorNames.blue:
-              letterScore *= 2;
-              break;
-            case FieldColorNames.deepBlue:
-              letterScore *= 3;
-              break;
-            default:
-              break;
-          }
-        }
-        const newCoordinates = (arr: number[]) => {
-          return [currentCoordinates[0] + arr[0], currentCoordinates[1] + arr[1]];
-        };
-        const searchExpression = (arr: number[]) => {
-          return Object.keys(this.setCells).includes(newCoordinates(arr).join(' '));
-        };
-        const directions = [
-          [0, -1],
-          [0, 1],
-          [-1, 0],
-          [1, 0],
-        ];
-        let multiDirection = 0;
-        directions.forEach((direction: number[]) => {
-          if (searchExpression(direction)) {
-            let tempCoord = newCoordinates(direction).join(' ');
-            if (wordDirection) {
-              if (
-                newCoordinates(direction)[0] === currentCoordinates[0] &&
-                !(wordDirection === 'v')
-              ) {
-                multiDirection += 1;
-              } else if (
-                newCoordinates(direction)[1] === currentCoordinates[1] &&
-                !(wordDirection === 'h')
-              ) {
-                multiDirection += 1;
-              }
-            }
-            while (this.cellsLetters[tempCoord]) {
-              if (
-                Object.keys(this.nowCells).includes(tempCoord) ||
-                tempBlocked.includes(tempCoord)
-              ) {
-                break;
-              }
-              resultScore += Number(scoreRaw(this.language)[this.cellsLetters[tempCoord]]);
-              tempBlocked.push(tempCoord);
-              const splitCoord = tempCoord.split(' ').map(Number);
-              if (direction[0] !== 0) {
-                tempCoord = [
-                  splitCoord[0] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
-                  splitCoord[1],
-                ].join(' ');
-              }
-              if (direction[1] !== 0) {
-                tempCoord = [
-                  splitCoord[0],
-                  splitCoord[1] > 0 ? splitCoord[0] + 1 : splitCoord[0] - 1,
-                ].join(' ');
-              }
-            }
-          }
-        });
-        resultScore += letterScore * (multiDirection + 1);
-      });
-    }; */
     const newMethod = () => {
       const toCoordinate = (str: string): number[] => {
         return str.split(' ').map(Number);
@@ -433,11 +335,13 @@ export class AppComponent implements AfterViewInit, OnInit {
       const hozIterate = (tempCoordR: string) => {
         let tempCoord = tempCoordR;
         while (this.setCells[tempCoord]) {
-          blocked = [...tempCoord];
-          resultScore += this.getLetterScore(tempCoord)[0];
+          blocked = [...blocked, tempCoord];
+          let letterScore = this.getLetterScore(tempCoord)[0];
           if (Object.keys(this.nowCells).includes(tempCoord)) {
-            multiplier += this.getLetterScore(tempCoord)[1];
+            letterScore *= this.getLetterScore(tempCoord)[1];
+            multiplier += this.getLetterScore(tempCoord)[2];
           }
+          resultScore += letterScore;
           const temp = toCoordinate(tempCoord);
           tempCoord = toStringCoordinate([temp[0] + 1, temp[1]]);
         }
@@ -450,11 +354,13 @@ export class AppComponent implements AfterViewInit, OnInit {
         }
         while (this.setCells[tempCoord]) {
           if (!blocked.includes(tempCoord)) {
-            blocked = [...tempCoord];
-            resultScore += this.getLetterScore(tempCoord)[0];
+            blocked = [...blocked, tempCoord];
+            let letterScore = this.getLetterScore(tempCoord)[0];
             if (Object.keys(this.nowCells).includes(tempCoord)) {
-              multiplier += this.getLetterScore(tempCoord)[1];
+              multiplier += this.getLetterScore(tempCoord)[2];
+              letterScore *= this.getLetterScore(tempCoord)[1];
             }
+            resultScore += letterScore;
           }
           const temp = toCoordinate(tempCoord);
           tempCoord = toStringCoordinate([temp[0], temp[1] + 1]);
