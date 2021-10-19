@@ -171,8 +171,9 @@ export class AppComponent implements AfterViewInit, OnInit {
     }
   }
 
-  public clearClicked(): void {
-    Object.values(this.nowCells).forEach((el) => {
+  public clearClicked(global: boolean = false): void {
+    const object = global ? this.setCells : this.nowCells;
+    Object.values(object).forEach((el) => {
       const target = <HTMLDivElement>el.target;
       const coordinates = this.getCoordinates(target);
       if (Object.keys(this.cellsColors).includes(coordinates)) {
@@ -185,7 +186,7 @@ export class AppComponent implements AfterViewInit, OnInit {
       }
     });
     this.mode = 'waiting';
-    Object.keys(this.nowCells).forEach((id) => {
+    Object.keys(object).forEach((id) => {
       delete this.clickedCells[id];
       delete this.setCells[id];
     });
@@ -363,7 +364,6 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   public finishGame(): void {
-    this.mode = 'settings';
     this.dialog.open(FinishDialogComponent, {
       data: <DialogData>{
         labels: this.labels,
@@ -372,7 +372,8 @@ export class AppComponent implements AfterViewInit, OnInit {
       },
     });
     this.players = [];
-    this.clearClicked();
+    this.clearClicked(true);
+    this.mode = 'settings';
     this.setCells = {};
     this.clickedCells = {};
     this.cellsLetters = {};
