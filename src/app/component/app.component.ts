@@ -301,63 +301,52 @@ export class AppComponent implements AfterViewInit, OnInit {
   private calculateScore(): number {
     let resultScore = 0;
     let multiplier = 0;
-    const newMethod = () => {
-      const toCoordinate = (str: string): number[] => {
-        return str.split(' ').map(Number);
-      };
-      const toStringCoordinate = (list: number[]): string => {
-        return list.join(' ');
-      };
-      let blocked: string[] = [];
-      Object.keys(this.nowCells).forEach((center) => {
-        const hozFirstFun = (tempCoordR: string): string => {
-          let tempCoord = tempCoordR;
-          let lastFound = String();
-          while (this.setCells[tempCoord]) {
-            lastFound = tempCoord;
-            const temp = toCoordinate(tempCoord);
-            tempCoord = toStringCoordinate([temp[0] - 1, temp[1]]);
-          }
-          return lastFound;
-        };
-        const vertFirstFun = (tempCoordR: string): string => {
-          let tempCoord = tempCoordR;
-          let lastFound = String();
-          while (this.setCells[tempCoord]) {
-            lastFound = tempCoord;
-            const temp = toCoordinate(tempCoord);
-            tempCoord = toStringCoordinate([temp[0], temp[1] - 1]);
-          }
-          return lastFound;
-        };
-        const hozFirst = hozFirstFun(center);
-        const vertFirst = vertFirstFun(center);
-        const doOne = (tempCoord: string, direction: string): string => {
-          if (!blocked.includes(tempCoord)) {
-            blocked = [...blocked, tempCoord];
-            let letterScore = this.getLetterScore(tempCoord)[0];
-            if (Object.keys(this.nowCells).includes(tempCoord)) {
-              letterScore *= this.getLetterScore(tempCoord)[1];
-              multiplier += this.getLetterScore(tempCoord)[2];
-            }
-            resultScore += letterScore;
-          }
-          const temp = toCoordinate(tempCoord);
-          return toStringCoordinate(
-            direction === 'h' ? [temp[0] + 1, temp[1]] : [temp[0], temp[1] + 1],
-          );
-        };
-        const iterate = (tempCoordR: string, direction: string) => {
-          let tempCoord = tempCoordR;
-          while (this.setCells[tempCoord]) {
-            tempCoord = doOne(tempCoord, direction);
-          }
-        };
-        iterate(hozFirst, 'h');
-        iterate(vertFirst, 'v');
-      });
+    const toCoordinate = (str: string): number[] => {
+      return str.split(' ').map(Number);
     };
-    newMethod();
+    const toStringCoordinate = (list: number[]): string => {
+      return list.join(' ');
+    };
+    let blocked: string[] = [];
+    Object.keys(this.nowCells).forEach((center) => {
+      const search = (tempCoordR: string, direction: string): string => {
+        let tempCoord = tempCoordR;
+        let lastFound = String();
+        while (this.setCells[tempCoord]) {
+          lastFound = tempCoord;
+          const temp = toCoordinate(tempCoord);
+          tempCoord = toStringCoordinate(
+            direction === 'h' ? [temp[0] - 1, temp[1]] : [temp[0], temp[1] - 1],
+          );
+        }
+        return lastFound;
+      };
+      const hozFirst = search(center, 'h');
+      const vertFirst = search(center, 'v');
+      const calculatingIteration = (tempCoord: string, direction: string): string => {
+        if (!blocked.includes(tempCoord)) {
+          blocked = [...blocked, tempCoord];
+          let letterScore = this.getLetterScore(tempCoord)[0];
+          if (Object.keys(this.nowCells).includes(tempCoord)) {
+            letterScore *= this.getLetterScore(tempCoord)[1];
+            multiplier += this.getLetterScore(tempCoord)[2];
+          }
+          resultScore += letterScore;
+        }
+        const temp = toCoordinate(tempCoord);
+        return toStringCoordinate(
+          direction === 'h' ? [temp[0] + 1, temp[1]] : [temp[0], temp[1] + 1],
+        );
+      };
+      const iterate = (tempCoordR: string, direction: string) => {
+        let tempCoord = tempCoordR;
+        while (this.setCells[tempCoord]) {
+          tempCoord = calculatingIteration(tempCoord, direction);
+        }
+      };
+      iterate(hozFirst, 'h');
+      iterate(vertFirst, 'v');
+    });
     if (multiplier) {
       resultScore *= multiplier;
     }
