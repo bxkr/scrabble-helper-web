@@ -354,7 +354,7 @@ export class AppComponent implements AfterViewInit, OnInit {
       iterate(hozFirst, 'h');
       iterate(vertFirst, 'v');
       if (multiCounter === 2) {
-        resultScore += this.getLetterScore(center)[0] * this.getLetterScore(center)[1];
+        resultScore += this.getLetterScore(center)[0];
       }
     });
     if (multiplier) {
