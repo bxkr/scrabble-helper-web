@@ -324,6 +324,7 @@ export class AppComponent implements AfterViewInit, OnInit {
       };
       const hozFirst = search(center, 'h');
       const vertFirst = search(center, 'v');
+      let multiCounter = 0;
       const calculatingIteration = (tempCoord: string, direction: string): string => {
         if (!blocked.includes(tempCoord)) {
           blocked = [...blocked, tempCoord];
@@ -341,12 +342,20 @@ export class AppComponent implements AfterViewInit, OnInit {
       };
       const iterate = (tempCoordR: string, direction: string) => {
         let tempCoord = tempCoordR;
+        let iterationCounter = 0;
         while (this.setCells[tempCoord]) {
+          iterationCounter += 1;
           tempCoord = calculatingIteration(tempCoord, direction);
+        }
+        if (iterationCounter > 1) {
+          multiCounter += 1;
         }
       };
       iterate(hozFirst, 'h');
       iterate(vertFirst, 'v');
+      if (multiCounter === 2) {
+        resultScore += this.getLetterScore(center)[0] * this.getLetterScore(center)[1];
+      }
     });
     if (multiplier) {
       resultScore *= multiplier;
